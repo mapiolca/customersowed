@@ -1,0 +1,191 @@
+# Copyright (C) 2018 Laurent BOUQUET <dolibarr@joliciel.fr>
+#
+# This program is free software: you can redistribute it and / or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, or version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# goal WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+#
+# Generic
+#
+
+# Module label 'ModuleCustomersOwedName'
+ModuleCustomersOwedName = Due customers
+ModuleCustomersOwed = PDF table of the rest due by the customers
+
+# Module description 'ModuleCustomersOwedDesc'
+ModuleCustomersOwedDesc = Generates a PDF table of the rest due by customers
+CustomersOwedPDFModules = Customer Due Document Template
+CustomersOwedAtDateOf = Due to customers at %s
+AtDateOf= at %s
+BillsCustomersUnpaidForCompanyAtDateOf=Unpaid customer invoices for %s at %s
+BillsCustomersUnpaidAtDateOf=Unpaid customer invoices at %s
+RemainderToTakeAtDateOf = Remaining amount to be collected on the date of: <b>%s</b>
+RemainderToTakeForCompanyAtDateOf = Remaining amount to be collected for %s on the date of: <b>%s</b>
+WarningDelay = Late payment over %s days
+ExcludeDownpaymentInvoices = Exclude down payment invoices
+ExcludeDownpaymentInvoicesTooltip = Down payment invoices are not counted.
+OnlyInvoicesToThisCustomer = Only customer invoices
+OnlyLatePaymentInvoices = Only late payment invoices
+OnlyLatePaymentInvoicesTooltip = Only late payment invoices are taken into account.
+OnlyInvoicesCreatedBy = Only invoices created by
+OnlyInvoicesWhoseSalesRepresentativeIs = Only the invoices of the customers whose salesman is
+InvoicesSortedBy = Invoices sorted by %s from '%s'
+DescendingOrder = descending order
+AscendingOrder = ascending order
+
+CustomersOwedCreatedBy = Billed by %s
+CustomersOwedSendingMailWithPdf = Send Customers Due by E-mail
+CustomersOwedSendingMailWithPdfDesc = Send the 'Remainder Due' by e-mail with a PDF table of the rest due by the customers as attachments. <br/> The recipients and the sending methods are configurable in the configuration of the 'Due to customers' module.
+CustomersOwedSendAMail = Send by e-mail
+NoCustomerSelected = No customer selected
+NoUserSelected = No user selected
+CustomerSelectedDoesntHaveOwedInvoice = The selected customer "%s" does not have an invoice due
+CustomerSelectedDoesntHaveEmailAddress = The selected customer "%s" does not have an email address
+UserSelectedDoesntHaveEmailAddress = The selected user "%s" does not have an email address
+CustomersowedInvoicesListActualize = Refresh
+CustomersowedInvoicesListActualizeHelp = Refresh Invoice List
+CustomersowedPdfDocumentsGenerate = Generate
+CustomersowedPdfDocumentsGenerateHelp = Generate PDF
+
+CustomersOwed_f.facnumber = Invoice Number
+CustomersOwed_f.date_lim_reglement = Due Date
+CustomersOwed_f.ref_client = Ref. customer
+CustomersOwed_f.type = Type
+CustomersOwed_f.datef = Billing Date
+CustomersOwed_f.date = Billing Date
+CustomersOwed_p.ref = Ref. project
+CustomersOwed_p.title = Project
+CustomersOwed_s.town = City
+CustomersOwed_s.zip = Postal Code
+CustomersOwed_s.zip_SHORT = PC
+CustomersOwed_state.name = Department
+CustomersOwed_country.code_iso = Country
+CustomersOwed_typent.code = Company Type
+CustomersOwed_f.fk_mode_reglement = Payment Method
+CustomersOwed_f.total_ttc = Amount TTC
+CustomersOwed_f.total_ht = Amount HT
+CustomersOwed_f.total = Amount HT
+CustomersOwed_f.tva = VAT amount
+CustomersOwed_f.total_vat = VAT amount
+CustomersOwed_f.localtax1 =
+CustomersOwed_f.localtax2 =
+CustomersOwed_f.datec = Creation Date
+CustomersOwed_f.tms = Change Date
+
+#
+# Send PDF by email
+#
+#CUSTOMERSOWEDREPORT_EMAIL_DEFAULT_LANGUAGE = Default email language
+#CUSTOMERSOWEDREPORT_EMAIL_DEFAULT_LANGUAGEHelp = Language used for writing e-mails sent by 'Scheduled Jobs'
+CustomersowedSendMail = Mail to send the PDF Due customers
+ToKnowMore = To know more
+CustomersowedAtDateOf = Here is the rest due on the date of
+CustomersowedFileName = File Name
+CustomersowedSendMailFrom = Address of the mail sender
+CustomersowedSendMailFromHelp = Address of the sender of the mail that sends the PDF Due customers.
+CustomersowedMessageMailSubject = [__ [MAIN_INFO_SOCIETE_NOM] __] __ (ModuleCustomersOwedName) __
+CustomersowedMessageMailSubjectLabel = Model of the mail object
+CustomersowedMessageMailSubjectHelp = Template of the mail subject that sends the PDF Due customers.
+#CustomersowedMessageMailBody = __ (Hello) __, <br/> <br/> __ (CustomersowedAtDateOf) __: __DATE_YMDHMS__ <br/> <br/> __ (CustomersowedFileName) __: __FILE_NAME__ <br/> <br/> __ (ExcludeDownpaymentInvoices __: __CUSTOMERSOWEDREPORT_EXCLUDE_DP__ <br/> __ (OnlyLatePaymentInvoices) __: __CUSTOMERSOWEDREPORT_ONLY_LATE__ <br/> __ (OnlyInvoicesCreatedBy) __: __CUSTOMERSOWEDREPORT_ONLY_CREATED_BY__ <br/> <br/> __CUSTOMERSOWEDREPORT_INVOICES_LIST_TABLE__ <br/> <br /> > __ (ToKnowMore) __: <a href="__CUSTOMERSOWEDREPORT_URL__"> __CUSTOMERSOWEDREPORT_URL__ </a> <br/> <br/> __ (BestRegards) __, <br/> <br/> __USER_SIGNATURE__ <br/> <br /> > __ MAIN_INFO_SOCIETE_NOM__ <br/> __MAIN_INFO_SOCIETE_ADDRESS__ <br/> __MAIN_INFO_SOCIETE_ZIP__ __MAIN_INFO_SOCIETE_TOWN__ <br/> __ (PhoneShort) __ __MAIN_INFO_SOCIETE_TEL__ <br/> __ (Email) __ __FROM_EMAIL__ <br/> <a href="__DOL_MAIN_URL_ROOT__"> __DOL_MAIN_URL_ROOT__ </a>
+CustomersowedMessageMailBody = __ (Hello) __, __ <br/> (CustomersowedAtDateOf) __: __DATE_YMD__ <br/> __CUSTOMERSOWEDREPORT_EXCLUDE_DP__ __CUSTOMERSOWEDREPORT_ONLY_LATE__ __CUSTOMERSOWEDREPORT_ONLY_CREATED_BY__ __CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE__ __CUSTOMERSOWEDREPORT_INVOICES_LIST_TABLE__ <br/> __ (BestRegards) __, <br/> <br/> __USER_SIGNATURE__ <br/> <br/> __MAIN_INFO_SOCIETE_NOM__ <br/> __MAIN_INFO_SOCIETE_ADDRESS__ <br/> __MAIN_INFO_SOCIETE_ZIP__ __MAIN_INFO_SOCIETE_TOWN__ <br/> __ (PhoneShort) __ __MAIN_INFO_SOCIETE_TEL__ <br/> __ (Email) __ __FROM_EMAIL__ <br/> < a href = "__ DOL_MAIN_URL_ROOT __"> __DOL_MAIN_URL_ROOT__ </a>
+CustomersowedMessageMailBodyLabel = Email Content Template
+CustomersowedMessageMailBodyHelp = Template of the content of the mail that sends the PDF Due customers.
+BestRegards = Regards
+#
+# Administration page
+#
+CustomersOwedSetup = Module Configuration Due Customers
+Settings = Settings
+CustomersOwedSetupPage = Module Configuration Page Due Customers
+CustomersOwedPdfParameters = PDF Generation Parameters
+INVOICE_DEFAULT_UNPAYED_SORT_ORDER = Default Sort Order in Unpaid Billing Tables and Lists
+INVOICE_DEFAULT_UNPAYED_SORT_ORDERTooltip = For increasing order, set the value: 'ASC' and for descending order, set the value: 'DESC'. If empty, the sort order will be descending order (invoice dates).
+CUSTOMERSOWEDREPORT_EXCLUDE_DP = Exclude, by default, down payment invoices
+CUSTOMERSOWEDREPORT_EXCLUDE_DPTooltip = If no choice is made by the user, the option 'Exclude deposit invoices' will be checked.
+CUSTOMERSOWEDREPORT_ONLY_LATE = By default, select only late payment invoices
+CUSTOMERSOWEDREPORT_ONLY_LATETooltip = If no choice is made by the user, the option 'Only late payment invoices' will be checked.
+CUSTOMERSOWEDREPORT_ONLY_CREATED_BY = Show the option to choose 'Only invoices created by' a user
+CUSTOMERSOWEDREPORT_ONLY_CREATED_BYTooltip = If no choice is made by the user, this one will be automatically selected. Thus, only the invoices due, created by this user, will be displayed. <br/> If 'Due to Customers' emails are sent by 'Scheduled Work', each user will receive a list of the (remaining due) invoices they have created.
+CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE = Show the option to choose 'Only customer invoices where the salesperson is' the user
+CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVETooltip = By default, select the user to display only the invoices due from the customers of which he is the sales representative. <br/> If 'Due to customers' emails are sent by a 'Scheduled Work', each sales representative will receive the list of invoices (remaining due) from the customers assigned.
+CUSTOMERSOWEDREPORT_DEFAULT_FILTER_HT_COLUMN = Automatically place the column 'Amount HT' in the search filter of the customer view
+CUSTOMERSOWEDREPORT_DEFAULT_FILTER_HT_COLUMNTooltip = For the column 'Amount HT' to be displayed by default, set the value: '1'
+CUSTOMERSOWEDREPORT_PDF_HEADER_TABLE_BACKGROUND_COLOR = Background <b> color code </ b> for table headers, PDF files
+CUSTOMERSOWEDREPORT_PDF_HEADER_TABLE_BACKGROUND_COLORTooltip = For example, for a blue background, set the value: '# 467FCF'. If empty, the background color of the top menu (displayed on the screen) will be used.
+CUSTOMERSOWEDREPORT_PDF_HEADER_TABLE_TITLE_TEXT_COLOR = Text <b> Text Code </ b> for Table Headers in PDF Files
+CUSTOMERSOWEDREPORT_PDF_HEADER_TABLE_TITLE_TEXT_COLORTooltip = For example, for white text, set the value: '#FFFFFF'. If empty, the white color will be used.
+CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME = To change the payment delay alert image
+CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAMETooltip = To not display an image, set the value to 'none'. Here are other examples of possible values: 'error', 'high', 'status8' or 'warning'. If empty, the 'warning' value will be used.
+CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URL = The mail may contain URLs
+CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URLTooltip = If the 'Due customers' does not concern a single client, access to Dolibarr's URL can be inserted in the sent emails.
+ReadCustomersOwed = Read Documents Due Customers
+CreateCustomersOwed = Create a document Due customers
+DeleteCustomersOwed = Delete Documents Due Customers
+AllCustomers = All Customers
+CustomersOwedTestBuilddoc = Test the PDF creation
+CustomersOwedTestSendByMail = Test sending by email
+CustomersOwedSendByMailOK = File sent successfully!
+CustomersOwedSendByMailKO = An error occurred while sending the file
+CustomersOwedSendByMailKONoRecipientAddress = No email recipient
+ErrorModuleNotFound = Module not found
+
+#
+# CRON
+#
+CustomersOwedUnableToGetFirstAdminUser = Can not get first administrator user
+CustomersOwedMailSendTo = An email has been sent to '%s' (%s).
+CustomersOwedMailsSend = %s mails have been sent.
+CustomersOwedMailSend = %s email has been sent.
+
+#
+# SPECIMEN
+#
+A_COMPANY_TO_TEST = A CLIENT TO TEST
+A_SECOND_COMPANY = A SECOND CUSTOMER
+
+#
+# Page About
+#
+About = About
+CustomersOwedAbout = About the module Due customers
+CustomersOwedAboutPage = Page about module Due customers
+
+#
+# Main page
+#
+CustomersOwedPage = Due customers
+CustomersOwedNoInvoice = No invoice
+PdfDocuments = PDF documents
+Zip = Zip
+Town = Town
+#
+# Box
+#
+CustomersOwedBox = Due customers
+CustomersOwedBoxDescription = Total remaining due by customers on today's date
+
+
+#
+# Document templates
+#
+PDFStandardCustomersOwedsModel = Remainder PDF Table Due by Customers
+PDFContactCustomersOwedsModel = Remainder PDF table due by customers (with the possibility to add other columns such as 'Amount HT' and 'Claim')
+PDFNextepCustomersOwedsModel = PDF chart of the remaining due date by customers (30 days, 60 days, 90 days, 180 days, and more than 180 days)
+PDFMalliarosCustomersOwedsModel = PDF table of the total Outstanding balance per customer (one line per customer)
+
+CustomersOwed30days = < 30 days
+CustomersOwed60days = 30 - 60 days
+CustomersOwed90days = 60 - 90 days
+CustomersOwed180days = 90 - 180 days
+CustomersOwedMore180days = > 180 days
+
+CustomersOwedTimetableAtDateOf = Remaining schedule due by customers at %s

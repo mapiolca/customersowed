@@ -1,0 +1,195 @@
+# Copyright (C) 2018 Laurent BOUQUET <dolibarr@joliciel.fr>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#
+# Générique
+#
+
+# Module label 'ModuleCustomersOwedName'
+ModuleCustomersOwedName = Dû clients
+ModuleCustomersOwed = Tableau PDF du reste dû par les clients
+
+# Module description 'ModuleCustomersOwedDesc'
+ModuleCustomersOwedDesc = Permet de générer un tableau PDF du reste dû par les clients
+CustomersOwedPDFModules=Modèle de documents Dû clients
+CustomersOwedAtDateOf = Dû clients au %s
+AtDateOf=à la date du %s
+BillsCustomersUnpaidForCompanyAtDateOf=Factures client impayées par "%s" à la date du %s
+BillsCustomersUnpaidAtDateOf=Factures client impayées à la date du %s
+RemainderToTakeAtDateOf = Montant restant à percevoir à la date du %s : <b>%s</b>
+RemainderToTakeForCompanyAtDateOf = Montant restant à percevoir par %s à la date du %s : <b>%s</b>
+WarningDelay = Retard de paiement supérieur à %s jours
+ExcludeDownpaymentInvoices = Exclure les factures d'acompte
+ExcludeDownpaymentInvoicesTooltip = Les factures d'acompte ne sont pas comptabilisées.
+OnlyInvoicesToThisCustomer = Uniquement les factures du client
+OnlyLatePaymentInvoices = Uniquement les factures en retard de paiement
+OnlyLatePaymentInvoicesTooltip = Seules les factures en retard de paiement sont prises en compte.
+OnlyInvoicesCreatedBy = Uniquement les factures créées par
+OnlyInvoicesWhoseSalesRepresentativeIs = Uniquement les factures des clients dont le commercial est
+InvoicesSortedBy = Factures triées par %s de '%s'
+DescendingOrder = ordre décroissant
+AscendingOrder = ordre croissant
+
+CustomersOwedCreatedBy = Facturées par %s
+CustomersOwedSendingMailWithPdf = Envoyer le Dû clients par e-mails
+CustomersOwedSendingMailWithPdfDesc = Permet d'envoyer le 'Reste dû' par e-mails avec un tableau PDF du reste dû par les clients, en pièces jointes. <br/>Les destinataires et les modalités d'envoi sont paramétrables dans la configuration du module 'Dû clients'.
+CustomersOwedSendAMail = Envoyer par e-mail
+NoCustomerSelected = Aucun client sélectionné
+NoUserSelected = Aucun utilisateur sélectionné
+CustomerSelectedDoesntHaveOwedInvoice = Le client sélectionné "%s" n'a pas de facture due
+CustomerSelectedDoesntHaveEmailAddress = Le client sélectionné "%s" n'a pas d'adresse email
+UserSelectedDoesntHaveEmailAddress = L'utilisateur sélectionné "%s" n'a pas d'adresse email
+CustomersowedInvoicesListActualize = Actualiser
+CustomersowedInvoicesListActualizeHelp = Actualiser la liste des factures
+CustomersowedPdfDocumentsGenerate = Génerer
+CustomersowedPdfDocumentsGenerateHelp = Génerer le PDF
+
+CustomersOwed_f.facnumber = Numéro de facture
+CustomersOwed_f.date_lim_reglement = Date échéance
+CustomersOwed_f.ref_client = Réf. client
+CustomersOwed_f.type = Type
+CustomersOwed_f.datef = Date facturation
+CustomersOwed_f.date = Date facturation
+CustomersOwed_p.ref = Ref projet
+CustomersOwed_p.title = Libellé projet
+CustomersOwed_s.town = Ville
+CustomersOwed_s.zip = Code postal
+CustomersOwed_s.zip_SHORT = CP
+CustomersOwed_state.nom = Département
+CustomersOwed_country.code_iso = Pays
+CustomersOwed_typent.code = Type de société
+CustomersOwed_f.fk_mode_reglement = Mode de règlement
+CustomersOwed_f.total_ttc = Montant TTC
+CustomersOwed_f.total_ht = Montant HT
+CustomersOwed_f.total = Montant HT
+CustomersOwed_f.tva = Montant TVA
+CustomersOwed_f.total_vat = Montant TVA
+CustomersOwed_f.localtax1 = 
+CustomersOwed_f.localtax2 = 
+CustomersOwed_f.datec = Date création
+CustomersOwed_f.tms = Date modif.
+
+#
+# Envoi du PDF par mail
+#
+#CUSTOMERSOWEDREPORT_EMAIL_DEFAULT_LANGUAGE = Langue par défaut des e-mails
+#CUSTOMERSOWEDREPORT_EMAIL_DEFAULT_LANGUAGEHelp = Langue utilisée pour la rédaction des e-mails envoyés par les 'Travaux planifiés' 
+CustomersowedSendMail=Mail pour envoyer le PDF Dû clients
+ToKnowMore=Pour en savoir plus
+CustomersowedAtDateOf = Voici le restant dû à la date du
+CustomersowedFileName=Nom du fichier
+CustomersowedSendMailFrom=Adresse de l'expéditeur du mail
+CustomersowedSendMailFromHelp=Adresse de l'expéditeur du mail qui envoie le PDF Dû clients.
+CustomersowedMessageMailSubject=[__[MAIN_INFO_SOCIETE_NOM]__] __(ModuleCustomersOwedName)__
+CustomersowedMessageMailSubjectLabel=Modèle de l'objet du mail
+CustomersowedMessageMailSubjectHelp=Modèle de l'objet du mail qui envoie le PDF Dû clients.
+#CustomersowedMessageMailBody=__(Hello)__,<br/><br/>__(CustomersowedAtDateOf)__ : __DATE_YMDHMS__ <br/><br/>__(CustomersowedFileName)__ : __FILE_NAME__ <br/><br/>__(ExcludeDownpaymentInvoices)__ : __CUSTOMERSOWEDREPORT_EXCLUDE_DP__<br/><br/>__(OnlyLatePaymentInvoices)__ : __CUSTOMERSOWEDREPORT_ONLY_LATE__<br/><br/>__(OnlyInvoicesCreatedBy)__ : __CUSTOMERSOWEDREPORT_ONLY_CREATED_BY__<br/><br/>__CUSTOMERSOWEDREPORT_INVOICES_LIST_TABLE__ <br/><br/> __(ToKnowMore)__ : <a href="__CUSTOMERSOWEDREPORT_URL__"> __CUSTOMERSOWEDREPORT_URL__</a><br/><br/>__(BestRegards)__,<br/><br/>__USER_SIGNATURE__<br/><br/>__MAIN_INFO_SOCIETE_NOM__<br/>__MAIN_INFO_SOCIETE_ADDRESS__<br/>__MAIN_INFO_SOCIETE_ZIP__ __MAIN_INFO_SOCIETE_TOWN__<br/>__(PhoneShort)__ __MAIN_INFO_SOCIETE_TEL__<br/>__(Email)__ __FROM_EMAIL__ <br/><a href="__DOL_MAIN_URL_ROOT__"> __DOL_MAIN_URL_ROOT__</a>
+#CustomersowedMessageMailBody=__(Hello)__,<br/><br/>__(CustomersowedAtDateOf)__ : __DATE_YMD__ <br/><br/>__CUSTOMERSOWEDREPORT_EXCLUDE_DP__ __CUSTOMERSOWEDREPORT_ONLY_LATE__ __CUSTOMERSOWEDREPORT_ONLY_CREATED_BY__ __CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE__ __CUSTOMERSOWEDREPORT_INVOICES_LIST_TABLE__ <br/>__(BestRegards)__,<br/><br/>__USER_SIGNATURE__<br/><br/>__MAIN_INFO_SOCIETE_NOM__<br/>__MAIN_INFO_SOCIETE_ADDRESS__<br/>__MAIN_INFO_SOCIETE_ZIP__ __MAIN_INFO_SOCIETE_TOWN__<br/>__(PhoneShort)__ __MAIN_INFO_SOCIETE_TEL__<br/>__(Email)__ __FROM_EMAIL__ <br/><a href="__DOL_MAIN_URL_ROOT__"> __DOL_MAIN_URL_ROOT__</a>
+CustomersowedMessageMailBody=__(Hello)__,<br/><br/>__(CustomersowedAtDateOf)__ : __DATE_YMD__ __CUSTOMERSOWEDREPORT_EXCLUDE_DP__ __CUSTOMERSOWEDREPORT_ONLY_LATE__ __CUSTOMERSOWEDREPORT_ONLY_CREATED_BY__ __CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE__ <br/><br/>__CUSTOMERSOWEDREPORT_INVOICES_LIST_TABLE__ <br/>__(BestRegards)__,<br/><br/>__USER_SIGNATURE__<br/>__MAIN_INFO_SOCIETE_NOM__<br/>__MAIN_INFO_SOCIETE_ADDRESS__<br/>__MAIN_INFO_SOCIETE_ZIP__ __MAIN_INFO_SOCIETE_TOWN__<br/>__(PhoneShort)__ : __MAIN_INFO_SOCIETE_TEL__<br/>__(Email)__ : __FROM_EMAIL__ <br/>__DOL_MAIN_URL_ROOT__
+CustomersowedMessageMailBodyLabel=Modèle du contenu du mail
+CustomersowedMessageMailBodyHelp=Modèle du contenu du mail qui envoie le PDF Dû clients.
+BestRegards=Cordialement
+
+#
+# Page d'administration
+#
+CustomersOwedSetup = Configuration du module Dû clients
+Settings = Réglages
+CustomersOwedSetupPage = Page de configuration du module Dû clients
+CustomersOwedPdfParameters = Paramètres de génération des PDF
+INVOICE_DEFAULT_UNPAYED_SORT_ORDER = Ordre de tri par défaut, dans les tableaux et listes de factures impayées
+INVOICE_DEFAULT_UNPAYED_SORT_ORDERTooltip = Pour un ordre croissant, mettre la valeur : 'ASC' et pour un ordre décroissant, mettre la valeur : 'DESC'. Si vide, l'ordre de tri sera l'ordre décroissant (des dates de factures).
+CUSTOMERSOWEDREPORT_EXCLUDE_DP = Exclure, par défaut, les factures d'acompte
+CUSTOMERSOWEDREPORT_EXCLUDE_DPTooltip = Si aucun choix n'est fait par l'utilisateur, l'option 'Exclure les factures d'acompte' sera cochée.
+CUSTOMERSOWEDREPORT_ONLY_LATE = Ne sélectionner, par défaut, que les factures en retard de paiement
+CUSTOMERSOWEDREPORT_ONLY_LATETooltip = Si aucun choix n'est fait par l'utilisateur, l'option 'Uniquement les factures en retard de paiement' sera cochée.
+CUSTOMERSOWEDREPORT_ONLY_CREATED_BY = Afficher la possibilité de choisir 'Uniquement les factures créées par' un utilisateur
+CUSTOMERSOWEDREPORT_ONLY_CREATED_BYTooltip = Si aucun choix n'est fait par l'utilisateur, celui ci sera automatiquement sélectionné. Ainsi, ne seront affichées que les factures dûes, créées par cet utilisateur. <br/>Si des e-mails 'Dû clients' sont envoyés par un 'Travail planifié', chaque utilisateur recevra la liste des factures (restant dues) qu'il a créées.
+CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE = Afficher la possibilité de choisir 'Uniquement les factures des clients dont le commercial est' l'utilisateur
+CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVETooltip = Par défaut, sélectionner l'utilisateur pour n'afficher que les factures dûes des clients dont il est le représentant commercial. <br/>Si des e-mails 'Dû clients' sont envoyés par un 'Travail planifié', chaque commercial recevra la liste des factures (restant dues) des clients dont il est assigné.
+CUSTOMERSOWEDREPORT_DEFAULT_FILTER_HT_COLUMN = Positionner automatiquement la colonne 'Montant HT' dans le filtre de recherche
+CUSTOMERSOWEDREPORT_DEFAULT_FILTER_HT_COLUMNTooltip = Si Oui, la colonne 'Montant HT' sera affichée par défaut, dans la vue 'Dû clients'.
+CUSTOMERSOWEDREPORT_PDF_HEADER_TABLE_BACKGROUND_COLOR = Code couleur du <b>fond</b> pour les entêtes des tableaux, dans les fichiers PDF
+CUSTOMERSOWEDREPORT_PDF_HEADER_TABLE_BACKGROUND_COLORTooltip = Par exemple, pour un fond bleu, mettre la valeur : '#467FCF'. Si vide, la couleur d'arrière-plan du menu supérieur (affiché à l'écran) sera utilisée.
+CUSTOMERSOWEDREPORT_PDF_HEADER_TABLE_TITLE_TEXT_COLOR = Code couleur du <b>texte</b> pour les entêtes des tableaux, dans les fichiers PDF
+CUSTOMERSOWEDREPORT_PDF_HEADER_TABLE_TITLE_TEXT_COLORTooltip = Par exemple, pour un texte blanc, mettre la valeur : '#FFFFFF'. Si vide, la couleur blanche sera utilisée.
+CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME = Image d'alerte de retard de règlement
+CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAMETooltip = Pour ne pas afficher d'image, mettre la valeur : 'none'. Voici d'autres exemples de valeurs possibles : 'error', 'high', 'statut8' ou 'warning'. Si vide, la valeur 'warning' sera utilisée.
+CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URL = Le mail peut contenir des URL
+CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URLTooltip = Si le 'Dû clients' ne concerne pas qu'un seul client, des accès à l'URL de Dolibarr peuvent être insérés dans les mails envoyés.
+ReadCustomersOwed = Lire les documents Dû clients
+CreateCustomersOwed = Créer un document Dû clients
+DeleteCustomersOwed = Supprimer les documents Dû clients
+AllCustomers = Tous les clients
+CustomersOwedTestBuilddoc = Tester la création du PDF
+CustomersOwedTestSendByMail = Tester l'envoi par e-mails
+CustomersOwedSendByMailOK = Fichier envoyé avec succès !
+CustomersOwedSendByMailKO = Une erreur est intervenue lors de l'envoi du fichier
+CustomersOwedSendByMailKONoRecipientAddress = Aucun destinataire du mail
+ErrorModuleNotFound = Module non trouvé
+ErrorFolderNotExists = Le dossier des PDF n'existe pas. Veuillez désactiver/réactiver le module 'Dû clients'
+
+#
+# CRON
+#
+CustomersOwedUnableToGetFirstAdminUser = Impossible d'obtenir le premier utilisateur administrateur
+CustomersOwedMailSendTo = Un mail a été envoyé à '%s' (%s).
+CustomersOwedMailsSend = %s mails ont été envoyés.
+CustomersOwedMailsSend = %s mail a été envoyé.
+
+#
+# SPECIMEN
+#
+A_COMPANY_TO_TEST = UN CLIENT POUR TESTER
+A_SECOND_COMPANY = UN DEUXIEME CLIENT
+
+#
+# Page À propos
+#
+About = À propos
+CustomersOwedAbout = À propos du module Dû clients
+CustomersOwedAboutPage = Page à propos du module Dû clients
+
+#
+# Page principale
+#
+CustomersOwedPage = Dû clients
+CustomersOwedNoInvoice = Aucune facture
+PdfDocuments = Documents PDF
+Zip = Code postal
+Town = Ville
+
+#
+# Box
+#
+CustomersOwedBox = Dû clients
+CustomersOwedBoxDescription = Total restant dû par les clients à la date du jour
+
+
+#
+# Modèles de documents
+# 
+PDFStandardCustomersOwedsModel = Tableau PDF du Reste dû par les clients
+PDFJolicielCustomersOwedsModel = Tableau PDF du Reste dû par les clients (avec la possibilité d'ajouter d'autres colonnes telles que 'Montant HT' et 'Créance')
+PDFNextepCustomersOwedsModel = Tableau PDF de l'échéancier restant dû par les clients (à 30 jours, 60 jours, 90 jours, 180 jours, et à plus de 180 jours)
+PDFMalliarosCustomersOwedsModel = Tableau PDF du total Reste dû par client (une seule ligne par client)
+
+CustomersOwed30days = < 30 jours
+CustomersOwed60days = 30 - 60 jours
+CustomersOwed90days = 60 - 90 jours
+CustomersOwed180days = 90 - 180 jours
+CustomersOwedMore180days = > 180 jours
+
+CustomersOwedTimetableAtDateOf = Echéancier restant dû par les clients au %s

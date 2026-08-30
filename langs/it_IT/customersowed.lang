@@ -1,0 +1,191 @@
+# Copyright (C) 2018 Laurent BOUQUET <dolibarr@joliciel.fr>
+#
+# Questo programma è software libero: puoi ridistribuirlo e / o modificarlo
+# è sotto i termini della GNU General Public License come pubblicata da
+# la Free Software Foundation, o la versione 3 della Licenza, o
+# (a tua scelta) qualsiasi versione successiva.
+#
+# Questo programma è distribuito nella speranza che sia utile,
+# obiettivo SENZA ALCUNA GARANZIA; senza nemmeno la garanzia implicita di
+# COMMERCIABILITÀ o IDONEITÀ PER UN PARTICOLARE SCOPO. Vedere il
+# GNU General Public License per maggiori dettagli.
+#
+# Dovresti aver ricevuto una copia della GNU General Public License
+# insieme a questo programma. Altrimenti, vedi <http://www.gnu.org/licenses/>.
+
+#
+# Generico
+#
+
+# Etichetta modulo 'ModuleCustomersOwedName'
+ModuleCustomersOwedName = Due clienti
+ModuleCustomersOwed = tabella PDF del resto dovuto dai clienti
+
+# Descrizione del modulo 'ModuleCustomersOwedDesc'
+ModuleCustomersOwedDesc = Genera una tabella PDF del resto dovuto dai clienti
+CustomersOwedPDFModules = Modello del documento del cliente
+CustomersOwedAtDateOf = A causa dei clienti a %s
+AtDateOf=alla data di %s
+BillsCustomersUnpaidForCompanyAtDateOf=Fatture attive non pagate per %s alla data di: %s
+BillsCustomersUnpaidForCompany=Fatture attive non pagate per %s
+BillsCustomersUnpaidAtDateOf=Resto rimanente da riscuotere alla data di: %s
+RemainderToTakeAtDateOf= Resto rimanente da riscuotere alla data di: %s
+RemainderToTakeForCompanyAtDateOf = Resto rimanente da riscuotere dei clienti a %s alla data di: %s
+WarningDelay = Ritardo di pagamento per %s giorni
+ExcludeDownpaymentInvoices = Escludi fatture di acconto
+ExcludeDownpaymentInvoicesTooltip = Le fatture di acconto non vengono conteggiate.
+OnlyInvoicesToThisCustomer = Solo fatture cliente
+OnlyLatePaymentInvoices = Solo fatture di pagamento in ritardo
+OnlyLatePaymentInvoicesTooltip = Vengono prese in considerazione solo le fatture di pagamento in ritardo.
+OnlyInvoicesCreatedBy = Solo fatture create da
+OnlyInvoicesWhoseSalesRepresentativeIs = Solo le fatture dei clienti il cui venditore è
+InvoicesSortedBy = Fatture ordinate per %s da '%s'
+DescendingOrder = ordine decrescente
+AscendingOrder = ordine crescente
+
+CustomersOwedCreatedBy = Fatturato da %s
+CustomersOwedSendingMailWithPdf = Invia i clienti via e-mail
+CustomersOwedSendingMailWithPdfDesc = Invia il 'Resto dovuto' via e-mail con una tabella PDF del resto dovuta dai clienti come allegati. <br/> I destinatari e i metodi di invio sono configurabili nella configurazione del modulo "Grazie ai clienti".
+CustomersOwedSendAMail = Invia per e-mail
+NoCustomerSelected = Nessun cliente selezionato
+NoUserSelected = Nessun utente selezionato
+CustomerSelectedDoesntHaveOwedInvoice = Il cliente selezionato "%s" non ha una fattura dovuta
+CustomerSelectedDoesntHaveEmailAddress = Il cliente selezionato "%s" non ha un indirizzo email
+UserSelectedDoesntHaveEmailAddress = L'utente selezionato "%s" non ha un indirizzo e-mail
+CustomersowedInvoicesListActualize = Aggiorna
+CustomersowedInvoicesListActualizeHelp = Aggiorna elenco fatture
+CustomersowedPdfDocumentsGenerate = Genera
+CustomersowedPdfDocumentsGenerateHelp = Genera PDF
+
+CustomersOwed_e.facnumber = Numero della fattura
+CustomersOwed_f.date_lim_reglement = Scadenza
+CustomersOwed_f.ref_client = Rif. cliente
+CustomersOwed_f.type = Type
+CustomersOwed_f.datef = Data di fatturazione
+CustomersOwed_f.date = Data di fatturazione
+CustomersOwed_p.ref = Progetto
+CustomersOwed_s.town = City
+CustomersOwed_s.zip = Codice postale
+CustomersOwed_s.zip_SHORT = CP
+CustomersOwed_state.name = Dipartimento
+CustomersOwed_country.code_iso = Paese
+CustomersOwed_typent.code = Tipo di società
+CustomersOwed_f.fk_mode_reglement = Metodo di pagamento
+CustomersOwed_f.total_ttc = Amount TTC
+CustomersOwed_f.total_ht = Amount HT
+CustomersOwed_f.total = Amount HT
+CustomersOwed_f.tva = importo IVA
+CustomersOwed_f.total_vat = importo IVA
+CustomersOwed_f.localtax1 =
+CustomersOwed_f.localtax2 =
+CustomersOwed_f.datec = Data di creazione
+CustomersOwed_f.tms = Cambia data
+
+#
+# PDF Invio di posta
+#
+#CUSTOMERSOWEDREPORT_EMAIL_DEFAULT_LANGUAGE = lingua di default
+#CUSTOMERSOWEDREPORT_EMAIL_DEFAULT_LANGUAGEHelp = Lingua utilizzata per la scrittura di e-mail inviate dai 'lavori pianificati'
+CustomersowedSendMail = elettronica per inviare PDF clientela Debiti
+ToKnowMore = Per saperne di più
+CustomersowedAtDateOf = Ecco in circolazione alla data di
+CustomersowedFileName = Nome del file
+CustomersowedSendMailFrom = indirizzo del mittente dell'e-mail
+CustomersowedSendMailFromHelp = indirizzo del mittente dell'e-mail che invia i clienti a causa del pdf.
+CustomersowedMessageMailSubject = [__ [MAIN_INFO_SOCIETE_NOM] __] __ (ModuleCustomersOwedName) __
+Modello = CustomersowedMessageMailSubjectLabel l'oggetto dell'e-mail
+Modello = CustomersowedMessageMailSubjectHelp l'oggetto dell'e-mail che invia i PDF clienti a causa.
+#CustomersowedMessageMailBody = __ (ciao) __, __ <br/> (CustomersowedAtDateOf) __: __ __DATE_YMDHMS__ <br/> (CustomersowedFileName) __: __ __FILE_NAME__ <br/> (ExcludeDownpaymentInvoices ) __: __ __CUSTOMERSOWEDREPORT_EXCLUDE_DP__ <br/> (OnlyLatePaymentInvoices) __: __ __CUSTOMERSOWEDREPORT_ONLY_LATE__ <br/> (OnlyInvoicesCreatedBy) __: __CUSTOMERSOWEDREPORT_ONLY_CREATED_BY__ <br/> __CUSTOMERSOWEDREPORT_INVOICES_LIST_TABLE__ <br/> <br / > __ (ToKnowMore) __: <a href="__CUSTOMERSOWEDREPORT_URL__"> __CUSTOMERSOWEDREPORT_URL__ </a> <br/> __ (BestRegards) __, <br/> __USER_SIGNATURE__ <br/> <br / > __ MAIN_INFO_SOCIETE_NOM__ <br/> __MAIN_INFO_SOCIETE_ADDRESS__ <br/> __MAIN_INFO_SOCIETE_ZIP__ __MAIN_INFO_SOCIETE_TOWN__ <br/> __ (PhoneShort) __ __ __MAIN_INFO_SOCIETE_TEL__ <br/> (e-mail) __ __FROM_EMAIL__ <br/> <a href="__DOL_MAIN_URL_ROOT__"> __DOL_MAIN_URL_ROOT__ </a>
+CustomersowedMessageMailBody = __ (Ciao) __, __ <br/> (CustomersowedAtDateOf) __: __DATE_YMD__ <br/> __CUSTOMERSOWEDREPORT_EXCLUDE_DP__ __CUSTOMERSOWEDREPORT_ONLY_LATE__ __CUSTOMERSOWEDREPORT_ONLY_CREATED_BY__ __CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE__ __CUSTOMERSOWEDREPORT_INVOICES_LIST_TABLE__ <br/> __ (BestRegards) __, <br/> <br/> __USER_SIGNATURE__ <br/> __MAIN_INFO_SOCIETE_NOM__ <br/> __MAIN_INFO_SOCIETE_ADDRESS__ <br/> __MAIN_INFO_SOCIETE_ZIP__ __MAIN_INFO_SOCIETE_TOWN__ <br/> __ (PhoneShort) __ __ __MAIN_INFO_SOCIETE_TEL__ <br/> (e-mail) __ __FROM_EMAIL__ <br/> < a href = "__ __ DOL_MAIN_URL_ROOT"> __DOL_MAIN_URL_ROOT__ </a>
+CustomersowedMessageMailBodyLabel = Email Content Model
+CustomersowedMessageMailBodyHelp = Del modello di contenuti e-mail che invia i clienti a causa del pdf.
+BestRegards = Saluti
+#
+# Pagina di amministrazione
+#
+CustomersOwedSetup = Configurazione del modulo Due clienti
+Impostazioni = Impostazioni
+CustomersOwedSetupPage = Pagina di configurazione del modulo Clienti debitori
+CustomersOwedPdfParameters = Parametri di generazione PDF
+INVOICE_DEFAULT_UNPAYED_SORT_ORDER = Ordine di ordinamento predefinito in tabelle ed elenchi di fatturazione non pagati
+INVOICE_DEFAULT_UNPAYED_SORT_ORDERTooltip = Per ordine crescente, impostare il valore: 'ASC' e per ordine decrescente, impostare il valore: 'DESC'. Se vuoto, l'ordinamento sarà decrescente (date di fatturazione).
+CUSTOMERSOWEDREPORT_EXCLUDE_DP = Escludi, per impostazione predefinita, fatture di acconto
+CUSTOMERSOWEDREPORT_EXCLUDE_DPTooltip = Se l'utente non fa alcuna scelta, verrà selezionata l'opzione 'Escludi fatture di deposito'.
+CUSTOMERSOWEDREPORT_ONLY_LATE = Per impostazione predefinita, seleziona solo fatture con pagamento in ritardo
+CUSTOMERSOWEDREPORT_ONLY_LATETooltip = Se l'utente non fa alcuna scelta, verrà selezionata l'opzione "Solo fatture di pagamento in ritardo".
+CUSTOMERSOWEDREPORT_ONLY_CREATED_BY = Mostra l'opzione per scegliere "Solo fatture create da" un utente
+CUSTOMERSOWEDREPORT_ONLY_CREATED_BYTooltip = Se l'utente non fa alcuna scelta, questa verrà automaticamente selezionata. Pertanto, verranno visualizzate solo le fatture dovute, create da questo utente. <br/> Se le e-mail "A causa di clienti" vengono inviate da "Lavori programmati", ogni utente riceverà un elenco delle fatture (rimanenti scadute) che hanno creato.
+CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE = Mostra l'opzione per scegliere "Solo fatture cliente in cui il venditore è" l'utente
+CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVETooltip = Per impostazione predefinita, selezionare l'utente per visualizzare solo le fatture dovute dai clienti di cui è rappresentante di vendita. <br/> Se le e-mail "A causa di clienti" vengono inviate da un "Lavoro programmato", ciascun rappresentante di vendita riceverà l'elenco delle fatture (rimanenti dovute) dai clienti assegnati.
+CUSTOMERSOWEDREPORT_DEFAULT_FILTER_HT_COLUMN = Posiziona automaticamente la colonna "Quantità HT" nel filtro di ricerca della vista cliente
+CUSTOMERSOWEDREPORT_DEFAULT_FILTER_HT_COLUMNTooltip = Per la colonna 'Amount HT' da visualizzare di default, imposta il valore: '1'
+CUSTOMERSOWEDREPORT_PDF_HEADER_TABLE_BACKGROUND_COLOR = Sfondo <b> codice colore </ b> per intestazioni di tabelle, file PDF
+CUSTOMERSOWEDREPORT_PDF_HEADER_TABLE_BACKGROUND_COLORTooltip = Ad esempio, per uno sfondo blu, imposta il valore: '# 467FCF'. Se vuoto, verrà utilizzato il colore di sfondo del menu principale (visualizzato sullo schermo).
+CUSTOMERSOWEDREPORT_PDF_HEADER_TABLE_TITLE_TEXT_COLOR = Testo <b> Codice testo </ b> per intestazioni di tabella nei file PDF
+CUSTOMERSOWEDREPORT_PDF_HEADER_TABLE_TITLE_TEXT_COLORTooltip = Ad esempio, per il testo bianco, imposta il valore: '#FFFFFF'. Se vuoto, verrà utilizzato il colore bianco.
+CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME = Per modificare l'immagine di avviso di ritardo del pagamento
+CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAMETooltip = Per non visualizzare un'immagine, imposta il valore su "nessuno". Ecco altri esempi di possibili valori: "error", "high", "statut8" o "warning". Se vuoto, verrà utilizzato il valore 'warning'.
+CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URL = La posta può contenere URL
+CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URLTooltip = Se i 'Due clienti' non riguardano un singolo cliente, l'accesso all'URL di Dolibarr può essere inserito nelle e-mail inviate.
+ReadCustomersOwed = Leggi i documenti con i clienti
+CreateCustomersOwed = Crea un documento Due clienti
+DeleteCustomersOwed = Elimina i documenti con i clienti
+AllCustomers = Tutti i clienti
+CustomersOwedTestBuilddoc = Verifica la creazione del PDF
+CustomersOwedTestSendByMail = Verifica l'invio tramite e-mail
+CustomersOwedSendByMailOK = File inviato correttamente!
+CustomersOwedSendByMailKO = Si è verificato un errore durante l'invio del file
+CustomersOwedSendByMailKONoRecipientAddress = Nessun destinatario e-mail
+ErrorModuleNotFound = Modulo non trovato
+
+#
+# CRON
+#
+CustomersOwedUnableToGetFirstAdminUser = Impossibile ottenere il primo utente amministratore
+CustomersOwedMailSendTo = È stata inviata uno e-mail a '%s' (%s).
+CustomersOwedMailsSend = %s mail sono state inviate.
+CustomersOwedMailsSend = %s email è stata inviata.
+#
+# CAMPIONE
+#
+A_COMPANY_TO_TEST = UN CLIENTE DA TEST
+A_SECOND_COMPANY = UN SECONDO CLIENTE
+
+#
+# Pagina Informazioni
+#
+About = About
+CustomersOwedAbout = Informazioni sul modulo Due clienti
+CustomersOwedAboutPage = Pagina relativa al modulo Due clienti
+
+#
+# Pagina principale
+#
+CustomersOwedPage = Due clienti
+CustomersOwedNoInvoice = Nessuna fattura
+PdfDocuments = documenti PDF
+Zip = codice postale
+Town = Città
+
+#
+# Box
+#
+CustomersOwedBox = Due clienti
+CustomersOwedBoxDescription = Totale rimanente dovuto dai clienti in data odierna
+
+
+#
+# Modelli di documento
+#
+PDFStandardCustomersOwedsModel = Remainder PDF Table dovuto dai clienti
+PDFJolicielCustomersOwedsModel = Ripristina tabella PDF esigibile (con la possibilità di aggiungere altre colonne come "Quantità HT" e "Richiesta")
+PDFNextepCustomersOwedsModel = Grafico PDF della data di scadenza residua da parte dei clienti (30 giorni, 60 giorni, 90 giorni, 180 giorni e più di 180 giorni)
+PDFMalliarosCustomersOwedsModel = Tabella PDF del saldo totale in sospeso per cliente (una riga per cliente)
+
+CustomersOwed30days = <30 giorni
+CustomersOwed60days = 30 - 60 giorni
+CustomersOwed90days = 60 - 90 giorni
+CustomersOwed180days = 90 - 180 giorni
+CustomersOwedMore180days = > 180 giorni
+
+CustomersOwedTimetableAtDateOf = Pianificazione rimanente dovuta dai clienti a %s
