@@ -58,7 +58,7 @@ class modCustomersOwed extends DolibarrModules
 		$this->rights_class = 'customersowed';
 
 		// Family can be 'base' (core modules),'crm','financial','hr','projects','products','ecm','technic' (transverse modules),'interface' (link with external tools),'other','...'
-		$this->family = "financial";
+		$this->family = "Joliciel x Les Métiers du Bâtiment";
 
 		// Module position in the family on 2 digits ('01', '10', '20', ...)
 		$this->module_position = '90';
@@ -74,7 +74,7 @@ class modCustomersOwed extends DolibarrModules
 		$this->editor_url = 'https://www.joliciel.fr';
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.4.3';
+		$this->version = '2.0.0';
 
 		// Key used in llx_const table to save module status enabled/disabled (where CUSTOMERSOWEDREPORT is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);

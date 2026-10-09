@@ -62,7 +62,7 @@ In your browser:
 
   - Log in to Dolibarr as a super administrator.
   - Go to ```Home - Configuration - Modules```
-  - You should now be able to find and activate the module 'Due Customers' in the section 'Financial Modules'
+  - You should now be able to find and activate the module 'Due Customers' in the section 'Joliciel x Les Métiers du Bâtiment'
 
 
 ## Licenses
@@ -86,3 +86,8 @@ All the texts of the documentation and the README files are freely usable and mo
 Other modules are available at <a href="https://www.dolistore.com" target="_new">Dolistore.com</a>.
 
 To obtain a new module, made especially for you, write to: <a href="mailto:dolibarr@joliciel.fr">dolibarr@joliciel.fr</a>.
+
+## Preparing v2.0.0
+
+Family: **Joliciel x Les Métiers du Bâtiment**.
+See [V2.0.0-AUDIT.md](V2.0.0-AUDIT.md) for release blockers. Full compliance and Dolibarr v20+/PHP 8.0+ compatibility remain unverified.

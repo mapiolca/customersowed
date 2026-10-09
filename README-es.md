@@ -61,7 +61,7 @@ En tu navegador:
 
   - Inicia sesión en Dolibarr como super administrador.
   - Ir a ```Inicio - Configuración - Módulos```
-  - Ahora debería poder encontrar y activar el módulo 'Clientes vencidos' en la sección 'Módulos financieros'
+  - Ahora debería poder encontrar y activar el módulo 'Clientes vencidos' en la sección 'Joliciel x Les Métiers du Bâtiment'
 
 
 ## Licencias
