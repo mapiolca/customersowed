@@ -209,3 +209,10 @@ CustomersOwedReportRequirements=Dolibarr 20+, PHP 8.0+ et module Factures requis
 CustomersOwedSharedRequirements=Module Multicompany requis ; les partages natifs des factures et des tiers sont respectés.
 CustomersOwedCronRequirements=Modules Factures et Travaux planifiés requis, avec les droits de l’utilisateur d’exécution.
 CustomersOwedCompatibilityNotTested=Les versions minimales sont déclarées. Les essais sur votre instance Dolibarr et Multicompany restent nécessaires.
+
+CustomersOwedMailBalance=Montant restant dû
+CustomersOwedMailEyebrow=SUIVI DES COMPTES CLIENTS
+CustomersOwedMailInvoiceCount=facture(s) dans ce rapport
+CustomersOwedMailIntroduction=Vous trouverez ci-dessous le détail des factures et de leur solde à la date indiquée. Le rapport PDF complet est joint à ce message.
+CustomersOwedMailInvoiceDetails=Détail des factures
+CustomersOwedMailOpenReport=Consulter le rapport dans Dolibarr

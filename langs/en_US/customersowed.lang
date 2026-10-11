@@ -206,3 +206,10 @@ CustomersOwedReportRequirements=Requires Dolibarr 20+, PHP 8.0+ and the Invoices
 CustomersOwedSharedRequirements=Requires Multicompany; native invoice and third-party sharing rules apply.
 CustomersOwedCronRequirements=Requires Invoices and Scheduled jobs, with the execution user’s permissions.
 CustomersOwedCompatibilityNotTested=Minimum versions are declared. Tests on your Dolibarr and Multicompany instance are still required.
+
+CustomersOwedMailBalance=Outstanding balance
+CustomersOwedMailEyebrow=CUSTOMER ACCOUNT SUMMARY
+CustomersOwedMailInvoiceCount=invoice(s) in this report
+CustomersOwedMailIntroduction=The invoices and their remaining balances at the indicated date are listed below. The complete PDF report is attached to this message.
+CustomersOwedMailInvoiceDetails=Invoice details
+CustomersOwedMailOpenReport=View the report in Dolibarr

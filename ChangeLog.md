@@ -3,6 +3,7 @@
 
 FR
 ## 2.0.0 — en préparation
+ - Améliorer le mail de rapport selon le modèle de newsletter fourni, avec date du rapport, synthèse et créance par facture ; conserver les modèles personnalisés. Dans les quatre modèles PDF, utiliser les blocs natifs émetteur/destinataire et le code client pour un rapport limité à un tiers, et uniquement l’émetteur pour les rapports internes ou multi-tiers.
  - Maintenir le rapport, le widget, les quatre modèles PDF et les emails sur un socle déclaré Dolibarr 20+/PHP 8.0+ ; classement dans « Joliciel x Les Métiers du Bâtiment » et onglets Compatibilité/À propos issus du descripteur.
  - Respecter les droits natifs, les restrictions commerciales et les partages de factures ; ajouter le filtre Environnement, la pagination SQL et corriger les agrégats de règlements/avoirs.
  - Protéger les rapports par utilisateur et entité, vérifier leur périmètre au téléchargement et réserver le pied de page natif dans les PDF ; régénération nécessaire des anciens rapports.

@@ -92,12 +92,10 @@ if (empty($socid)) {
 		$only_user = $user->id;
 	}
 }
-// Mail body template
-$langs_trans_CustomersowedMessageMailBody = str_replace('<br/>', '
-', $langs->trans('CustomersowedMessageMailBody'));
-$langs_trans_CustomersowedMessageMailBody = str_replace('&lt;br/>', '
-', $langs_trans_CustomersowedMessageMailBody);
-$email_body_template = getDolGlobalString('CUSTOMERSOWEDREPORT_PDF_EMAIL_BODY_TEMPLATE', $langs_trans_CustomersowedMessageMailBody);
+// Keep the configured body; present the new default without overwriting constants.
+$legacyBody = $langs->trans('CustomersowedMessageMailBody');
+$email_body_template = CustomersOwedMail::selectTemplate(
+	getDolGlobalString('CUSTOMERSOWEDREPORT_PDF_EMAIL_BODY_TEMPLATE', $legacyBody), $legacyBody);
 
 $type = 'customersowed';
 

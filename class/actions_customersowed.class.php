@@ -29,6 +29,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once __DIR__.'/customersowed.class.php';
+require_once __DIR__.'/customersowedmail.class.php';
 
 /**
  * Class ActionsCustomersOwed
@@ -285,12 +286,10 @@ class ActionsCustomersOwed
 			$email_body = "";
 			$email_subject_template = getDolGlobalString('CUSTOMERSOWEDREPORT_PDF_EMAIL_SUBJECT_TEMPLATE', $this->outputlangs->trans('CustomersowedMessageMailSubject'));
 
-			// Mail body template
-			$langs_trans_CustomersowedMessageMailBody = str_replace('<br/>', '
-			', $this->outputlangs->trans('CustomersowedMessageMailBody'));
-			$langs_trans_CustomersowedMessageMailBody = str_replace('&lt;br/>', '
-			', $langs_trans_CustomersowedMessageMailBody);
-			$email_body_template = getDolGlobalString('CUSTOMERSOWEDREPORT_PDF_EMAIL_BODY_TEMPLATE', $langs_trans_CustomersowedMessageMailBody);
+			// Keep personalized templates; upgrade only the unchanged translated default.
+			$legacyBody = $this->outputlangs->trans('CustomersowedMessageMailBody');
+			$email_body_template = CustomersOwedMail::selectTemplate(
+				getDolGlobalString('CUSTOMERSOWEDREPORT_PDF_EMAIL_BODY_TEMPLATE', $legacyBody), $legacyBody);
 
 			$CUSTOMERSOWEDREPORT_EXCLUDE_DP = "";
 			if (! isset($exclude_dp)) {
@@ -359,7 +358,7 @@ class ActionsCustomersOwed
 				'__FROM_EMAIL__' => $email_from));
 
 			$substitutionarray = array_merge($substitutionarray, array(
-				'__DATE_YMD__' => dol_print_date(dol_now(), 'day', 0, $this->outputlangs),
+				'__DATE_YMD__' => dol_print_date($customersOwedReport->customersOwedDate, 'day', 0, $this->outputlangs),
 				'__DATE_YMDHMS__' => dol_print_date(dol_now(), 'dayhoursec', 0, $this->outputlangs),
 				'__CUSTOMERSOWEDREPORT_EXCLUDE_DP__' => $CUSTOMERSOWEDREPORT_EXCLUDE_DP,
 				'__CUSTOMERSOWEDREPORT_ONLY_LATE__' => $CUSTOMERSOWEDREPORT_ONLY_LATE,
@@ -381,105 +380,32 @@ class ActionsCustomersOwed
 
 			$email_subject = make_substitutions($email_subject_template, $substitutionarray, $this->outputlangs);
 
-			// /////////////////////////////////////////////////
-			$listTable = "";
-
-			$form = new Form($this->db);
-			$formfile = new FormFile($this->db);
-
-			$num = $customersOwedReport->lines_count;
-
-			$listTable .= '<div>';
-			$listTable .= '<table style="border-collapse: collapse;" width="700px">';
-			$listTable .= '<tr>';
-			$listTable .= '<th align="left">' . $this->outputlangs->trans("InvoiceRef") . '</th>';
-			$listTable .= '<th align="left">' . $this->outputlangs->trans("RefCustomer") . '</th>';
-			$listTable .= '<th align="center">' . $this->outputlangs->trans("DateDue") . '</th>';
-			$listTable .= '<th align="center">' . $this->outputlangs->trans("AmountTTC") . '</th>';
-			$listTable .= '<th align="center">' . $this->outputlangs->trans("Received") . '</th>';
-			$listTable .= '</tr>';
-
-			if ($num > 0) {
-				if ($num) {
-					$societestatic = new Societe($this->db);
-					$facturestatic = new Facture($this->db);
-					$total_ttc = $total_amount = $total_ht = $total_vat = 0;
-					$i = 0;
-					while ($i < $num) // && $i < $conf->liste_limit
-					{
-						$obj = $customersOwedReport->lines[$i];
-
-						$societestatic->name = $obj->name;
-						$societestatic->id = $obj->fk_soc;
-
-						$facturestatic->ref = $obj->facnumber;
-						$facturestatic->id = $obj->id;
-						$facturestatic->fk_soc = $obj->fk_soc;
-						$facturestatic->statut = $obj->fk_statut;
-						$facturestatic->date_lim_reglement = $this->db->jdate($obj->date_lim_reglement);
-						$facturestatic->total_ttc = $obj->total_ttc;
-
-						$totalpay = $obj->am;
-
-						$remaintopay = $facturestatic->total_ttc - $totalpay;
-
-						if ($i % 2 == 1) {
-							$listTable .= '<tr style="background: #EEE;">';
-						} else {
-							$listTable .= '<tr style="background: #FFF;">';
-						}
-						$listTable .= '<td style="border-style: solid; border-width: thin;" width="110">';
-						if (($socid < 1) && (getDolGlobalString('CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URL') > 0)) {
-							$listTable .= '<a href="' . DOL_MAIN_URL_ROOT . '/compta/facture/card.php?facid=' . $facturestatic->id . '">' . $facturestatic->ref . '</a>';
-						} else {
-							$listTable .= $facturestatic->ref;
-						}
-						$listTable .= '</td>';
-						$listTable .= '<td style="border-style: solid; border-width: thin;" align="left">';
-						if (($socid < 1) && (getDolGlobalString('CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URL') > 0)) {
-							$listTable .= '<a href="' . DOL_MAIN_URL_ROOT . '/societe/card.php?socid=' . (int) $societestatic->id . '">' . dol_escape_htmltag($societestatic->name) . '</a>';
-						} else {
-							$listTable .= dol_escape_htmltag($societestatic->name);
-						}
-						$listTable .= '</td>';
-
-						// DateDue
-						$listTable .= '<td style="border-style: solid; border-width: thin;" align="center">' . dol_print_date($this->db->jdate($obj->date_lim_reglement), 'day') . '</td>';
-
-						// Amount TTC
-						$listTable .= '<td style="border-style: solid; border-width: thin;" align="right">' . price($obj->total_ttc) . '</td>';
-
-						// Received
-						$listTable .= '<td style="border-style: solid; border-width: thin;" align="right">' . price($obj->am) . '</td>';
-
-						// Totals calc
-						$total_ttc += $obj->total_ttc;
-						$total_ht += $obj->total_ht;
-						$total_vat += $obj->total_vat;
-						$total_amount += $obj->am;
-						$total_rtp += $remaintopay;
-
-						$i ++;
-					}
-
-					$listTable .= '<tr>';
-					$listTable .= '<td colspan="2">' . $this->outputlangs->trans("RemainderToTakeAtDateOf", dol_print_date($customersOwedReport->customersOwedDate, "%d/%m/%Y"), price($total_ttc - $total_amount)) . '</font> </td>';
-					$listTable .= '<td></td>';
-					$listTable .= '<td align="right">' . price($total_ttc) . '</td>';
-					$listTable .= '<td align="right">' . price($total_amount) . '</td>';
-					$listTable .= '</tr>';
-				} else {
-					$colspan = 6;
-					$listTable .= '<tr><td colspan="' . $colspan . '">' . $this->outputlangs->trans("NoInvoice") . '</td></tr>';
-				}
-				$listTable .= '</table>';
+			$withLinks = $socid < 1 && getDolGlobalInt('CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URL') > 0;
+			$listTable = CustomersOwedMail::buildInvoiceTable($customersOwedReport, $this->outputlangs, $this->db, $withLinks);
+			// Escape business values before inserting them into an HTML template.
+			$bodySubstitutions = array_map(static function ($value) { return dol_escape_htmltag((string) $value); }, $substitutionarray);
+			$bodySubstitutions['__MAIN_INFO_SOCIETE_ADDRESS__'] = dol_nl2br($bodySubstitutions['__MAIN_INFO_SOCIETE_ADDRESS__']);
+			$filters = array_filter(array($CUSTOMERSOWEDREPORT_EXCLUDE_DP, $CUSTOMERSOWEDREPORT_ONLY_LATE,
+				$CUSTOMERSOWEDREPORT_ONLY_CREATED_BY, $CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE));
+			$filterBlock = '';
+			if ($filters) {
+				$filterBlock = '<p style="margin:0 0 20px;color:#526174">'.implode('<br>', array_map('dol_escape_htmltag', $filters)).'</p>';
 			}
-			// /////////////////////////////////////////////////
-
-			$substitutionarray = array_merge($substitutionarray, array(
-				'__CUSTOMERSOWEDREPORT_INVOICES_LIST_TABLE__' => $listTable));
-			$email_body = make_substitutions($email_body_template, $substitutionarray, $this->outputlangs);
-			$email_body = str_replace("\n", "<br/>\n", $email_body);
+			$actionBlock = '';
+			if ($withLinks) {
+				$actionBlock = '<a href="'.dol_escape_htmltag($CUSTOMERSOWEDREPORT_URL).'" style="background-color:#253449;border-radius:6px;color:#ffffff;display:inline-block;font-weight:bold;padding:14px 20px;text-decoration:none">'
+					.dol_escape_htmltag($this->outputlangs->transnoentities('CustomersOwedMailOpenReport')).'</a>';
+			}
+			$bodySubstitutions['__CUSTOMERSOWEDREPORT_INVOICES_LIST_TABLE__'] = $listTable;
+			$bodySubstitutions['__CUSTOMERSOWEDREPORT_TOTAL_OWED__'] = price($customersOwedReport->totalCustomersOwed, 0, $this->outputlangs);
+			$bodySubstitutions['__CUSTOMERSOWEDREPORT_INVOICE_COUNT__'] = (string) count($customersOwedReport->lines);
+			$bodySubstitutions['__CUSTOMERSOWEDREPORT_FILTERS_BLOCK__'] = $filterBlock;
+			$bodySubstitutions['__CUSTOMERSOWEDREPORT_ACTION_BLOCK__'] = $actionBlock;
+			// Convert plain-text newlines before adding the generated HTML table.
+			$email_body_template = dol_textishtml($email_body_template)
+				? dol_htmlwithnojs($email_body_template)
+				: dol_nl2br(dol_escape_htmltag($email_body_template));
+			$email_body = make_substitutions($email_body_template, $bodySubstitutions, $this->outputlangs);
 
 			require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
 

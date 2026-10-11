@@ -362,9 +362,11 @@ class pdf_joliciel
 		$this->onlyInvoicesCreatedBy = $object->onlyInvoicesCreatedBy;
 		$this->onlyInvoicesWhoseSalesRepresentativeIs = $object->onlyInvoicesWhoseSalesRepresentativeIs;
 
-		if ($socid > 0 && count(array_filter($object->lines, static function ($line) use ($socid) { return (int) $line->fk_soc === (int) $socid; })) > 0) {
+		$this->reportRecipient = null;
+		if ($socid > 0 && $object->lines && count(array_filter($object->lines, static function ($line) use ($socid) { return (int) $line->fk_soc !== (int) $socid; })) === 0) {
 			$societe = new Societe($this->db);
 			if ($societe->fetch($socid) <= 0) { $this->error = 'ErrorRecordNotFound'; return -1; }
+			$this->reportRecipient = $societe;
 			if (empty($object->title)) {
 				// $title = $outputLangs->transnoentities("BillsCustomersUnpaidForCompanyAtDateOf", $societe->name, dol_print_date(dol_now(), "day"));
 				$object->title = $outputLangs->transnoentities("BillsCustomersUnpaidForCompany", $societe->name);
@@ -388,6 +390,7 @@ class pdf_joliciel
 
 		// New page
 		$pdf->AddPage();
+		$this->prepareReportHeader($pdf, $outputLangs);
 		if (!$this->prepareReportLayout($pdf, $object, $outputLangs)) { return -1; }
 		$pagenb++;
 		$this->_pageHeaderAndFooter($pdf, $pagenb, $outputLangs, $socid, $sortfield, $sortorder);
@@ -467,19 +470,7 @@ class pdf_joliciel
 		}
 
 		$defaultFontSize = pdf_getPDFFontSize($outputLangs);
-		$pdf->SetFont('', '', $defaultFontSize - 4);
-
-		$pdf->SetXY($this->posxLeft, $this->marge_haute);
-		$pdf->Cell(80, $this->line_height, getDolGlobalString('MAIN_INFO_SOCIETE_NOM'), 0, 0, 'L');
-
-		// PDF document date
-		$pdf->SetXY($this->page_largeur - $this->marge_droite - 80, $this->marge_haute);
-		$pdf->Cell(80, $this->line_height, dol_print_date(time(), "day", false, $outputLangs, true), 0, 0, 'R');
-
-		// Title
-		$pdf->SetFont('', 'B', $defaultFontSize + 2);
-		$pdf->SetXY($this->marge_gauche, $this->marge_haute + ($this->line_height));
-		$pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche, $this->line_height, $this->title, 0, 'C', false, 0, '', '', true, 1, false, true, $this->line_height, 'T', true);
+		$this->printReportHeader($pdf, $outputLangs);
 
 		// Invoice number and company
 		$pdf->SetFont('', '', $defaultFontSize);
