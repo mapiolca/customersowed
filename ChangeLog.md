@@ -7,7 +7,7 @@ FR
  - Respecter les droits natifs, les restrictions commerciales et les partages de factures ; ajouter le filtre Environnement, la pagination SQL et corriger les agrégats de règlements/avoirs.
  - Protéger les rapports par utilisateur et entité, vérifier leur périmètre au téléchargement et réserver le pied de page natif dans les PDF ; régénération nécessaire des anciens rapports.
  - Préserver les réglages, modèles et cron ; migrer les droits utilisateurs/groupes de 423100/423101/423102 vers 42310001/42310002/42310003. Encadrer les envois périodiques et les reprises après résultat SMTP incertain.
- - Retirer les squelettes de démonstration et le log distribué. Tests locaux réussis ; essais réels Dolibarr/Multicompany/MySQL et rendu PDF encore nécessaires avant publication, voir V2.0.0-AUDIT.md.
+ - Corriger la signature du widget pour éviter une erreur fatale avec le contrat `ModeleBoxes::loadBox($max = 5)` ; retirer les squelettes de démonstration et le log distribué. Tests locaux réussis ; essais réels Dolibarr/Multicompany/MySQL et rendu PDF encore nécessaires avant publication, voir V2.0.0-AUDIT.md.
 
 ## 1.4.3
  - Corriger bug affichage liste des clients pour Dolibarr > 17

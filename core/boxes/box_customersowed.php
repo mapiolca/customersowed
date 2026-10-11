@@ -102,9 +102,10 @@ class box_customersowed extends ModeleBoxes
 	/**
 	 * Load data into info_box_contents array to show array later. Called by Dolibarr before displaying the box.
 	 *
+	 * @param int $max Maximum number of lines requested by Dolibarr (unused for this single-total box)
 	 * @return void
 	 */
-	public function loadBox()
+	public function loadBox($max = 5)
 	{
 		global $langs, $conf, $db;
 		$langs->load("boxes");

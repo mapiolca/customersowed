@@ -16,6 +16,43 @@ import unittest
 ROOT = Path(__file__).resolve().parent.parent
 
 
+class WidgetContractTests(unittest.TestCase):
+    def test_widget_loads_with_native_parent_signatures(self):
+        php = os.environ.get('PHP_BINARY') or shutil.which('php')
+        if not php:
+            self.skipTest('PHP runtime required')
+        # Source contracts read in Dolibarr 20.0.0 and 23.0.0; no instance is booted.
+        for parent_load in ('', 'public function loadBox($max = 5) {}'):
+            with self.subTest(parent_load=parent_load), tempfile.TemporaryDirectory() as directory:
+                parent = Path(directory) / 'core/boxes/modules_boxes.php'
+                parent.parent.mkdir(parents=True)
+                parent.write_text('''<?php
+class ModeleBoxes {
+    public function __construct($db, $param = '') {}
+    public function showBox($head, $contents, $nooutput = 0) { return $nooutput; }
+''' + parent_load + '\n}\n', encoding='utf-8', newline='\n')
+                runner = Path(directory) / 'widget.php'
+                runner.write_text('''<?php
+define('DOL_DOCUMENT_ROOT', getenv('CORE_FIXTURE_ROOT'));
+function isModEnabled($module) { return false; }
+$langs = new class { public function load($catalogue) {} };
+require getenv('WIDGET_FILE');
+$widget = (new ReflectionClass('box_customersowed'))->newInstanceWithoutConstructor();
+$method = new ReflectionMethod($widget, 'loadBox');
+if ($method->getNumberOfRequiredParameters() !== 0
+    || $method->getParameters()[0]->getDefaultValue() !== 5) { exit(1); }
+$widget->loadBox();
+$widget->loadBox(10);
+if ($widget->showBox(null, null, 1) !== 1) { exit(2); }
+echo 'OK';
+''', encoding='utf-8', newline='\n')
+                result = subprocess.run([php, str(runner)], capture_output=True, text=True,
+                                        env=dict(os.environ, CORE_FIXTURE_ROOT=directory,
+                                                 WIDGET_FILE=str(ROOT / 'core/boxes/box_customersowed.php')))
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(result.stdout, 'OK')
+
+
 class ReportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
