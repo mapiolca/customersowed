@@ -2,6 +2,7 @@
 
 /*
  * Copyright (C) 2018 Laurent BOUQUET <dolibarr@joliciel.fr>
+ * Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +42,8 @@ function customersowedAdminPrepareHead()
 	$head[$h][1] = $langs->trans("Settings");
 	$head[$h][2] = 'settings';
 	$h ++;
+	$head[$h++] = array(dol_buildpath('/customersowed/admin/compatibility.php', 1), $langs->trans('Compatibility'), 'compatibility');
+	$object = new stdClass();
 	if (intval(DOL_VERSION) > 7) {
 		$head[$h][0] = dol_buildpath("/customersowed/admin/about.php", 1);
 		$head[$h][1] = $langs->trans("About");

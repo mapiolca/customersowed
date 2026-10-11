@@ -1,3 +1,5 @@
+<!-- Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr> -->
+
 # Module 'Due Customers'
 
 ## Characteristics
@@ -62,7 +64,7 @@ In your browser:
 
   - Log in to Dolibarr as a super administrator.
   - Go to ```Home - Configuration - Modules```
-  - You should now be able to find and activate the module 'Due Customers' in the section 'Financial Modules'
+  - You should now be able to find and activate the module 'Due Customers' in the section 'Joliciel x Les Métiers du Bâtiment'
 
 
 ## Licenses
@@ -86,3 +88,26 @@ All the texts of the documentation and the README files are freely usable and mo
 Other modules are available at <a href="https://www.dolistore.com" target="_new">Dolistore.com</a>.
 
 To obtain a new module, made especially for you, write to: <a href="mailto:dolibarr@joliciel.fr">dolibarr@joliciel.fr</a>.
+
+## Preparing v2.0.0
+
+Family: **Joliciel x Les Métiers du Bâtiment**.
+Declared baseline: **Dolibarr 20+ / PHP 8.0+**. The report, widget, four PDF models and manual/scheduled emails are retained. The unused demonstration API, numbering, SQL and mailing scaffolding are removed; no business table is created or dropped.
+
+The report applies native invoice/third-party sharing and sales restrictions before SQL pagination. Multicompany lists expose an Environment filter and native badges. Payments and applied credits are aggregated separately, including consumption of source credit notes. The payment cutoff includes the selected day. Historical credit application cannot be reconstructed exactly: Dolibarr's discount record has a creation date, but no reliable timestamp for its later application. This report is not an immutable historical ledger.
+
+### Updating an existing installation
+
+- Install the new module files before disabling/re-enabling it, so the new preservation logic handles the existing settings and scheduled job. Back up the database and document directory first.
+- Reactivation migrates user/group rights `423100 → 42310001`, `423101 → 42310002`, `423102 → 42310003`. Existing grants, entity settings, custom/default models and cron frequency/status are preserved. The historical module ID `423100` is retained; no replacement ID has been allocated.
+- Generate reports again. New PDFs live in the current entity's native document directory under `private/<execution-user-id>/`. Their invoice manifest is checked against current permissions at download time. Legacy PDFs in the shared root are not moved or deleted and are no longer exposed by the module.
+- Configure the native scheduled job's execution user with module read/write, invoice and third-party read rights. Each recipient receives the intersection of their own scope and that user's scope. The job is declared disabled by default; an existing enabled job keeps its status.
+- The job locks per entity and remembers daily deliveries in `private/.cron/`. After an uncertain SMTP result it refuses automatic replay. Check delivery and logs before an administrator removes the affected `mail-<hash>.json` marker to authorize a deliberate retry. A marker is not proof of recipient delivery.
+
+### Verification
+
+Run `python -m unittest discover -s test -v` with PHP on PATH (or set `PHP_BINARY`). Relational tests execute SQL emitted by the production methods against an isolated SQLite fixture. The PHP harness also checks access refusals, repeated reads, directory errors, manifests, footer reservation and simulated cron replay without sending mail.
+
+PHP lint and twenty-one local tests passed under PHP 8.2.11, including the standard/situation invoice status matrix, incremental situation totals, partial payments, credits and historical payment cutoff. PHPStan is not installed/configured. A partial live acceptance test was performed on develop with Dolibarr 25.0.0-alpha/PHP 8.3.35: activation cycle, settings, widget, report filters/pagination/column alignment, existing situation invoices, PDF generation/download and one targeted SMTP send. Paid/abandoned invoice cases were simulated locally because none were present among the accessible live invoices. Receipt, minimum supported versions, restricted accounts, full Multicompany sharing, scheduled execution and PDF footer variants remain unverified. See [V2.0.0-AUDIT.md](V2.0.0-AUDIT.md) for evidence, restored settings and limits. This version remains in preparation; no release is published.
+
+The unchanged default email uses `templates/report-mail.html`, inspired by the supplied newsletter. Entity-specific custom bodies remain untouched. The four PDF models use native company/address helpers: an explicit single-third-party report includes the recipient and customer code; internal or multi-third-party reports include only the issuer. Native logo/frame/inversion settings apply. Address height is reserved before the invoice table. Six isolated presentation tests cover escaped values, balances, empty tables, custom templates and PDF address blocks; these checks do not prove email-client rendering or live PDF output.

@@ -1,4 +1,5 @@
 # Copyright (C) 2018 Laurent BOUQUET <dolibarr@joliciel.fr>
+# Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr>
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -189,3 +190,26 @@ CustomersOwed180days = 90 - 180 days
 CustomersOwedMore180days = > 180 days
 
 CustomersOwedTimetableAtDateOf = Remaining schedule due by customers at %s
+
+# Version 2.0 compatibility and access checks
+CustomersOwedDirectoryUnavailable=The document directory for this entity is unavailable.
+CustomersOwedCronBusy=An email run is already in progress for this entity.
+CustomersOwedMailUncertain=A previous delivery has an uncertain outcome. Verify delivery before manually resuming.
+CustomersOwedFooterTooLarge=The footer leaves insufficient room for the table. Reduce the footer free text.
+CustomersOwedEnvironment=Environment
+CustomersOwedMinimumDolibarr=Minimum Dolibarr version
+CustomersOwedMinimumPhp=Minimum PHP version
+CustomersOwedReportCapability=Customer balance report
+CustomersOwedSharedCapability=Invoices shared between entities
+CustomersOwedCronCapability=Scheduled deliveries
+CustomersOwedReportRequirements=Requires Dolibarr 20+, PHP 8.0+ and the Invoices module.
+CustomersOwedSharedRequirements=Requires Multicompany; native invoice and third-party sharing rules apply.
+CustomersOwedCronRequirements=Requires Invoices and Scheduled jobs, with the execution user’s permissions.
+CustomersOwedCompatibilityNotTested=Minimum versions are declared. Tests on your Dolibarr and Multicompany instance are still required.
+
+CustomersOwedMailBalance=Outstanding balance
+CustomersOwedMailEyebrow=CUSTOMER ACCOUNT SUMMARY
+CustomersOwedMailInvoiceCount=invoice(s) in this report
+CustomersOwedMailIntroduction=The invoices and their remaining balances at the indicated date are listed below. The complete PDF report is attached to this message.
+CustomersOwedMailInvoiceDetails=Invoice details
+CustomersOwedMailOpenReport=View the report in Dolibarr

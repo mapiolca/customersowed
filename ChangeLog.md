@@ -1,5 +1,17 @@
+<!-- Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr> -->
+
 
 FR
+## 2.0.0 — en préparation
+ - Améliorer le mail de rapport selon le modèle de newsletter fourni, avec date du rapport, synthèse et créance par facture ; conserver les modèles personnalisés. Dans les quatre modèles PDF, utiliser les blocs natifs émetteur/destinataire et le code client pour un rapport limité à un tiers, et uniquement l’émetteur pour les rapports internes ou multi-tiers.
+ - Maintenir le rapport, le widget, les quatre modèles PDF et les emails sur un socle déclaré Dolibarr 20+/PHP 8.0+ ; classement dans « Joliciel x Les Métiers du Bâtiment » et onglets Compatibilité/À propos issus du descripteur.
+ - Respecter les droits natifs, les restrictions commerciales et les partages de factures ; ajouter le filtre Environnement, la pagination SQL et corriger les agrégats de règlements/avoirs.
+ - Protéger les rapports par utilisateur et entité, vérifier leur périmètre au téléchargement et réserver le pied de page natif dans les PDF ; régénération nécessaire des anciens rapports.
+ - Préserver les réglages, modèles et cron ; migrer les droits utilisateurs/groupes de 423100/423101/423102 vers 42310001/42310002/42310003. Encadrer les envois périodiques et les reprises après résultat SMTP incertain.
+ - Corriger la signature du widget pour éviter une erreur fatale avec le contrat `ModeleBoxes::loadBox($max = 5)` ; retirer les squelettes de démonstration et le log distribué.
+ - Adopter les tableaux natifs, un titre unique avec pictogramme facture, les filtres SQL par colonne, les tris sur reçu/créance et le positionnement natif du sélecteur ; exclure les avoirs clôturés du rapport, du widget et des envois sans perdre leurs imputations ; reprendre le drapeau payé natif pour éviter de présenter un avoir ouvert comme remboursé.
+ - Corriger les colonnes SQL natives de taxes locales, la navigation paginée, le total de page et l'alignement des en-têtes/montants/totaux ; afficher les statuts avec leur texte et isoler les spécimens PDF par modèle. Recette partielle réussie sur Dolibarr 25.0.0-alpha/PHP 8.3.35 ; limites avant publication consignées dans V2.0.0-AUDIT.md.
+
 ## 1.4.3
  - Corriger bug affichage liste des clients pour Dolibarr > 17
 ## 1.4.1
@@ -195,6 +207,5 @@ DE
 ## 1.0.9
  - Die "fälligen Kunden" an früheren Terminen insbesondere vor dem Rechnungsabschluss zu kennen (zum Beispiel am 31.12.2008)
  - Die "fälligen Kunden" für einen bestimmten Kunden kennen
-
 
 

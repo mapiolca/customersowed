@@ -2,6 +2,7 @@
 /*
  * Copyright (C) 2004-2017 Laurent Destailleur <eldy@users.sourceforge.net>
  * Copyright (C) 2018 Laurent BOUQUET <dolibarr@joliciel.fr>
+ * Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +53,7 @@ if (! $res)
 // Libraries
 require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
-require_once '../lib/customersowed.lib.php';
+require_once __DIR__.'/../lib/customersowed.lib.php';
 
 // Translations
 $langs->loadLangs(array(
@@ -94,6 +95,13 @@ dol_fiche_head($head, 'about', '', 0, 'customersowed@customersowed');
 
 dol_include_once('/customersowed/core/modules/modCustomersOwed.class.php');
 $tmpmodule = new modCustomersOwed($db);
+print '<div class="div-table-responsive-no-min"><table class="noborder centpercent">';
+foreach (array('Module' => $tmpmodule->name, 'Version' => $tmpmodule->version, 'Author' => $tmpmodule->editor_name,
+	'License' => $tmpmodule->license, 'CustomersOwedMinimumDolibarr' => implode('.', $tmpmodule->need_dolibarr_version),
+	'CustomersOwedMinimumPhp' => implode('.', $tmpmodule->phpmin), 'Dependencies' => implode(', ', $tmpmodule->depends)) as $label => $value) {
+	print '<tr class="oddeven"><td>'.$langs->trans($label).'</td><td>'.dol_escape_htmltag($value).'</td></tr>';
+}
+print '</table></div>';
 print $tmpmodule->getDescLong();
 
 // Page end

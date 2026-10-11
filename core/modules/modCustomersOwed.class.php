@@ -2,6 +2,7 @@
 /*
  * Copyright (C) 2004-2018 Laurent Destailleur <eldy@users.sourceforge.net>
  * Copyright (C) 2018 Laurent BOUQUET <dolibarr@joliciel.fr>
+ * Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +33,7 @@ include_once DOL_DOCUMENT_ROOT . '/core/modules/DolibarrModules.class.php';
  */
 class modCustomersOwed extends DolibarrModules
 {
+	public $license = 'GPL-3.0-or-later';
 
 	// @codingStandardsIgnoreEnd
 	/**
@@ -52,13 +54,14 @@ class modCustomersOwed extends DolibarrModules
 		$this->db = $db;
 
 		// Id for module (must be unique).
-		$this->numero = 423100; // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+		$this->numero = 423100; // Historical Joliciel ID retained to preserve installed module identity.
 
 		// Key text used to identify module (for permissions, menus, etc...)
 		$this->rights_class = 'customersowed';
 
 		// Family can be 'base' (core modules),'crm','financial','hr','projects','products','ecm','technic' (transverse modules),'interface' (link with external tools),'other','...'
-		$this->family = "financial";
+		$this->family = "Joliciel x Les Métiers du Bâtiment";
+		$this->familyinfo = array($this->family => array('position' => '90', 'label' => $this->family));
 
 		// Module position in the family on 2 digits ('01', '10', '20', ...)
 		$this->module_position = '90';
@@ -74,7 +77,7 @@ class modCustomersOwed extends DolibarrModules
 		$this->editor_url = 'https://www.joliciel.fr';
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.4.3';
+		$this->version = '2.0.0';
 
 		// Key used in llx_const table to save module status enabled/disabled (where CUSTOMERSOWEDREPORT is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
@@ -84,9 +87,9 @@ class modCustomersOwed extends DolibarrModules
 
 		// Defined all module parts (triggers, login, substitutions, menus, css, etc...)
 		$this->module_parts = array(
-			'triggers' => 1, // Set this to 1 if module has its own trigger directory (core/triggers)
+			'triggers' => 0, // Set this to 1 if module has its own trigger directory (core/triggers)
 			'login' => 0, // Set this to 1 if module has its own login method file (core/login)
-			'substitutions' => 1, // Set this to 1 if module has its own substitution function file (core/substitutions)
+			'substitutions' => 0, // Set this to 1 if module has its own substitution function file (core/substitutions)
 			'menus' => 0, // Set this to 1 if module has its own menus handler directory (core/menus)
 			'theme' => 0, // Set this to 1 if module has its own theme directory (theme)
 			'tpl' => 0, // Set this to 1 if module overwrite template dir (core/tpl)
@@ -98,8 +101,7 @@ class modCustomersOwed extends DolibarrModules
 				'/customersowed/js/customersowed.js.php'), // Set this to relative path of js file if module must load a js on all pages
 			'hooks' => array(
 				'data' => array(
-					'hookcontext1',
-					'hookcontext2'),
+					'main', 'document'),
 				'entity' => '0'), // Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context 'all'
 			'moduleforexternal' => 1 // Set this to 1 if feature of module are opened to external users
 		);
@@ -120,12 +122,8 @@ class modCustomersOwed extends DolibarrModules
 		$this->conflictwith = array(); // List of module class names as string this module is in conflict with
 		$this->langfiles = array(
 			"customersowed@customersowed");
-		$this->phpmin = array(
-			5,
-			3); // Minimum version of PHP required by module
-		$this->need_dolibarr_version = array(
-			6,
-			0); // Minimum version of Dolibarr required by module
+		$this->phpmin = array(8, 0); // Minimum version of PHP required by module
+		$this->need_dolibarr_version = array(20, 0); // Minimum version of Dolibarr required by module
 		$this->warnings_activation = array(); // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 		$this->warnings_activation_ext = array(); // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 
@@ -142,7 +140,7 @@ class modCustomersOwed extends DolibarrModules
 				'The mails sent by the periodic task do not contain down payment invoices.',
 				0,
 				'current',
-				1),
+				0),
 			2 => array(
 				'CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URL',
 				'chaine',
@@ -150,7 +148,7 @@ class modCustomersOwed extends DolibarrModules
 				'The sending of mail by the periodic task can contain URL.',
 				0,
 				'current',
-				1));
+				0));
 		/*
 		 * 2 => array(
 		 * 'CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE',
@@ -191,32 +189,33 @@ class modCustomersOwed extends DolibarrModules
 				'frequency' => 1,
 				'unitfrequency' => 86400,
 				'status' => 0,
-				'test' => '$conf->customersowed->enabled',
+				'test' => 'isModEnabled("customersowed")',
 				'priority' => 50));
 
 		// Permissions
 		$this->rights = array(); // Permission array used by this module
 
 		$r = 0;
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$r++;
+		$this->rights[$r][0] = $this->numero * 100 + $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = $langs->trans("ReadCustomersOwed"); // Permission label
 		$this->rights[$r][2] = 'r';
-		$this->rights[$r][3] = 1; // Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'read'; // In php code, permission will be checked by test if ($user->rights->customersowed->level1->level2)
+		$this->rights[$r][3] = 0; // Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'read';
 
 		$r ++;
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][0] = $this->numero * 100 + $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = $langs->trans("CreateCustomersOwed"); // Permission label
 		$this->rights[$r][2] = 'w';
-		$this->rights[$r][3] = 1; // Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'write'; // In php code, permission will be checked by test if ($user->rights->customersowed->level1->level2)
+		$this->rights[$r][3] = 0; // Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'write';
 
 		$r ++;
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][0] = $this->numero * 100 + $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = $langs->trans("DeleteCustomersOwed"); // Permission label
 		$this->rights[$r][2] = 'd';
 		$this->rights[$r][3] = 0; // Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'delete'; // In php code, permission will be checked by test if ($user->rights->customersowed->level1->level2)
+		$this->rights[$r][4] = 'delete';
 
 		// Main menu entries
 		$this->menu = array(); // List of menus to add
@@ -232,8 +231,8 @@ class modCustomersOwed extends DolibarrModules
 				'url' => '/customersowed/view/customers_owed_report.php',
 				'langs' => 'customersowed@customersowed',
 				'position' => '500',
-				'enabled' => '$conf->customersowed->enabled && $conf->facture->enabled',
-				'perms' => '$user->rights->customersowed->read',
+				'enabled' => 'isModEnabled("customersowed") && isModEnabled("facture")',
+				'perms' => '$user->hasRight("customersowed", "read")',
 				'target' => '',
 				'user' => 2);
 		} else {
@@ -247,8 +246,8 @@ class modCustomersOwed extends DolibarrModules
 				'url' => '/customersowed/view/customers_owed_report.php',
 				'langs' => 'customersowed@customersowed',
 				'position' => '500',
-				'enabled' => '$conf->customersowed->enabled && $conf->facture->enabled',
-				'perms' => '$user->rights->customersowed->read',
+				'enabled' => 'isModEnabled("customersowed") && isModEnabled("facture")',
+				'perms' => '$user->hasRight("customersowed", "read")',
 				'target' => '',
 				'user' => 2);
 		}
@@ -270,28 +269,37 @@ class modCustomersOwed extends DolibarrModules
 	{
 		global $conf, $langs;
 
-		$result = $this->_load_tables('/customersowed/sql/');
-		if ($result < 0)
-			return - 1; // Do not activate module if not allowed errors found on module SQL queries (the _load_table run sql with run_sql with error allowed parameter to 'default')
-
-		// Consts who depend on the language
-		$langs->loadLangs(array(
-			"admin",
-			"customersowed@customersowed",
-			"bills",
-			"members"));
-
-		// Set default model
-		$MODELNAME = 'joliciel';
-		$MODEL_TARGET_MODULE = 'customersowed';
-
-		$res = dolibarr_set_const($this->db, "CUSTOMERSOWEDREPORT_ADDON_PDF", $MODELNAME, 'chaine', 0, '', $conf->entity);
-
-		$sql = array(
-			"DELETE FROM " . MAIN_DB_PREFIX . "document_model WHERE nom = '" . $MODELNAME . "' AND type = '" . $MODEL_TARGET_MODULE . "' AND entity = " . $conf->entity,
-			"INSERT INTO " . MAIN_DB_PREFIX . "document_model (nom, type, libelle, entity) VALUES('" . $MODELNAME . "', '" . $MODEL_TARGET_MODULE . "', '" . $MODELNAME . "', " . $conf->entity . " )");
-
-		return $this->_init($sql, $options);
+		// No persistent report object exists: do not install ModuleBuilder example tables.
+		$this->db->begin();
+		if ($this->preserveScheduledJob() < 0) { $this->db->rollback(); return -1; }
+		foreach (array('user_rights' => 'fk_user', 'usergroup_rights' => 'fk_usergroup') as $table => $actor) {
+			foreach (array(423100 => 42310001, 423101 => 42310002, 423102 => 42310003) as $old => $new) {
+				$sql = 'INSERT INTO '.MAIN_DB_PREFIX.$table.' (entity, '.$actor.', fk_id)';
+				$sql .= ' SELECT old.entity, old.'.$actor.', '.$new.' FROM '.MAIN_DB_PREFIX.$table.' old';
+				$sql .= ' WHERE old.fk_id = '.$old.' AND NOT EXISTS (SELECT 1 FROM '.MAIN_DB_PREFIX.$table.' existing';
+				$sql .= ' WHERE existing.entity = old.entity AND existing.'.$actor.' = old.'.$actor.' AND existing.fk_id = '.$new.')';
+				if (!$this->db->query($sql)) {
+					$this->error = $this->db->lasterror();
+					$this->db->rollback();
+					return -1;
+				}
+			}
+			if (!$this->db->query('DELETE FROM '.MAIN_DB_PREFIX.$table.' WHERE fk_id IN (423100, 423101, 423102)')) {
+				$this->error = $this->db->lasterror(); $this->db->rollback(); return -1;
+			}
+		}
+		// Native insert_const() preserves existing values, including 0 and empty strings.
+		$this->const[] = array('CUSTOMERSOWEDREPORT_ADDON_PDF', 'chaine', 'joliciel', '', 0, 'current', 0);
+		$sql = array("INSERT INTO ".MAIN_DB_PREFIX."document_model (nom, type, libelle, entity)"
+			." SELECT 'joliciel', 'customersowed', 'joliciel', ".((int) $conf->entity)
+			." WHERE NOT EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."document_model WHERE type = 'customersowed' AND entity = ".((int) $conf->entity).")");
+		$result = $this->_init($sql, $options);
+		if ($result <= 0) {
+			$this->db->rollback();
+			return -1;
+		}
+		$this->db->commit();
+		return 1;
 	}
 
 	/**
@@ -305,13 +313,26 @@ class modCustomersOwed extends DolibarrModules
 	 */
 	public function remove($options = '')
 	{
+		if ($this->preserveScheduledJob() < 0) { return -1; }
+		return $this->_remove(array(), $options);
+	}
+
+	/** Retain the existing job's label and configuration before native init/remove.
+	 * @return int 1 on success, -1 on database error
+	 */
+	private function preserveScheduledJob()
+	{
 		global $conf;
-
-		// Remove default model
-		$MODEL_TARGET_MODULE = 'customersowed';
-		$sql = array(
-			"DELETE FROM " . MAIN_DB_PREFIX . "document_model WHERE type = '" . $MODEL_TARGET_MODULE . "' AND entity = " . $conf->entity . ";");
-
-		return $this->_remove($sql, $options);
+		$where = " WHERE module_name = 'customersowed' AND entity = ".(int) $conf->entity
+			." AND classesname = '/customersowed/class/actions_customersowed.class.php' AND methodename = 'sendMails'";
+		$result = $this->db->query('SELECT label FROM '.MAIN_DB_PREFIX.'cronjob'.$where);
+		if (!$result) { $this->error = $this->db->lasterror(); return -1; }
+		if (is_object($job = $this->db->fetch_object($result))) { $this->cronjobs[0]['label'] = $job->label; }
+		$this->db->free($result);
+		$test = $this->db->escape('isModEnabled("customersowed")');
+		if (!$this->db->query('UPDATE '.MAIN_DB_PREFIX."cronjob SET test = '".$test."'".$where." AND test = '1'")) {
+			$this->error = $this->db->lasterror(); return -1;
+		}
+		return 1;
 	}
 }
