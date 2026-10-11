@@ -8,7 +8,7 @@ define('DOL_VERSION', '20.0.0');
 define('MAIN_DB_PREFIX', 'erp_');
 class CommonObject { public $error = ''; public $id; public $rowid; public $entity; }
 class CommonObjectLine extends CommonObject {}
-class Facture { const STATUS_DRAFT = 0; const STATUS_VALIDATED = 1; const STATUS_CLOSED = 2; const TYPE_DEPOSIT = 3; }
+class Facture { const STATUS_DRAFT = 0; const STATUS_VALIDATED = 1; const STATUS_CLOSED = 2; const TYPE_DEPOSIT = 3; const TYPE_CREDIT_NOTE = 2; }
 class Project {}
 class DolibarrModules {
 	public function _init($sql, $options) { foreach ($sql as $query) { $this->db->query($query); } return 1; }
@@ -39,6 +39,14 @@ function dol_now() { return strtotime('2026-10-11 12:00:00 UTC'); }
 function dol_print_date($timestamp, $format) { return date($format === 'day' ? 'Y-m-d' : str_replace('%', '', $format), $timestamp); }
 function isModEnabled($module) { return in_array($module, array('customersowed', 'facture', 'multicompany', 'cron'), true); }
 function getEntity($element) { return '1,2'; }
+// Minimal native-search double for text and comparison scenarios, not a core integration test.
+function natural_search($field, $value, $numeric = 0) {
+	global $db;
+	if ($numeric && preg_match('/^(>=|<=|>|<|=)?(-?\d+(?:\.\d+)?)$/D', $value, $match)) {
+		return ' AND '.$field.' '.($match[1] ?: '=').' '.$match[2];
+	}
+	return " AND ".$field." LIKE '%".$db->escape($value)."%'";
+}
 function price2num($value, $mode) { return (float) $value; }
 $conf = (object) array('entity' => 1, 'facture' => (object) array('client' => (object) array('warning_delay' => 0)));
 $langs = new TestLangs(); $user = new TestUser(); $hookmanager = null; $db = new TestDb();
@@ -58,6 +66,15 @@ $report->selectedEntities = array();
 $report->fetch_lines(null, null, null, $user, 1, 1);
 $queries['page'] = end($db->queries); $queries['count'] = $db->queries[count($db->queries)-2];
 if ($report->total_rows !== 3 || $report->totalCustomersOwed !== 308.0) { throw new RuntimeException('pagination loses full totals'); }
+foreach (array('text' => array('f.ref' => 'F1'), 'amount' => array('rtp' => '>60'), 'date' => array('f.datef' => strtotime('2026-10-01 UTC')), 'type' => array('f.type' => '2')) as $scenario => $filters) {
+	$report->searchFilters = $filters;
+	if ($report->fetch_lines(null, 'rtp', 'DESC', $user, 20, 0) !== 1) { throw new RuntimeException('filter failed'); }
+	$queries['filter_'.$scenario] = end($db->queries);
+	$queries['count_'.$scenario] = $db->queries[count($db->queries)-2];
+}
+$report->searchFilters = array('injected.field' => '1');
+if ($report->fetch_lines() !== -1) { throw new RuntimeException('unknown filter accepted'); }
+$report->searchFilters = array();
 $report->selectedEntities = array(9);
 if ($report->fetch_lines() !== -1) { throw new RuntimeException('unauthorized entity accepted'); }
 $report->selectedEntities = array();

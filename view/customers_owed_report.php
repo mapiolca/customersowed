@@ -189,6 +189,58 @@ if ($reshook < 0) {
 	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
+
+// Every list column participates in the native selector and its position ordering.
+$contextpage = 'customersowedreport';
+$arrayfields = array(
+	'f.entity' => array('label' => 'CustomersOwedEnvironment', 'checked' => 1, 'enabled' => count(explode(',', getEntity('invoice'))) > 1 && isModEnabled('multicompany'), 'position' => 5, 'search' => 'entities', 'css' => 'center'),
+	'f.ref' => array('label' => 'InvoiceRef', 'checked' => 1, 'position' => 10, 'search' => 'text'),
+	's.nom' => array('label' => 'ThirdParty', 'checked' => 1, 'position' => 20, 'search' => 'text'),
+	'p.ref' => array('label' => 'ProjectRef', 'checked' => 1, 'enabled' => isModEnabled('projet'), 'position' => 30, 'search' => 'text', 'sql' => 'pr.ref'),
+	'p.title' => array('label' => 'ProjectLabel', 'checked' => 0, 'enabled' => isModEnabled('projet'), 'position' => 35, 'search' => 'text', 'sql' => 'pr.title'),
+	's.zip' => array('label' => 'Zip', 'checked' => 0, 'position' => 40, 'search' => 'text'),
+	's.town' => array('label' => 'Town', 'checked' => 0, 'position' => 45, 'search' => 'text'),
+	'f.ref_client' => array('label' => 'RefCustomer', 'checked' => 0, 'position' => 50, 'search' => 'text'),
+	'f.type' => array('label' => 'Type', 'checked' => 0, 'position' => 55, 'search' => 'select', 'css' => 'center'),
+	'f.fk_mode_reglement' => array('label' => 'PaymentMode', 'checked' => 0, 'position' => 60, 'search' => 'payment', 'css' => 'center'),
+	'f.date' => array('label' => 'DateInvoice', 'checked' => 0, 'position' => 65, 'search' => 'date', 'sql' => 'f.datef', 'css' => 'center nowrap'),
+	'f.datec' => array('label' => 'DateCreation', 'checked' => 0, 'position' => 70, 'search' => 'date', 'css' => 'center nowrap'),
+	'f.tms' => array('label' => 'DateModificationShort', 'checked' => 0, 'position' => 75, 'search' => 'date', 'css' => 'center nowrap'),
+	'f.date_lim_reglement' => array('label' => 'DateDue', 'checked' => 1, 'position' => 80, 'search' => 'date', 'css' => 'center nowrap'),
+	'f.total_ht' => array('label' => 'AmountHT', 'checked' => getDolGlobalInt('CUSTOMERSOWEDREPORT_DEFAULT_FILTER_HT_COLUMN'), 'position' => 90, 'search' => 'amount', 'css' => 'right nowrap'),
+	'f.total_vat' => array('label' => 'AmountVAT', 'checked' => 0, 'position' => 100, 'search' => 'amount', 'sql' => 'f.total_tva', 'css' => 'right nowrap'),
+	'f.total_localtax1' => array('label' => $langs->transcountry('AmountLT1', $mysoc->country_code), 'checked' => 1, 'enabled' => $mysoc->localtax1_assuj == '1', 'position' => 110, 'search' => 'amount', 'sql' => 'f.localtax1', 'css' => 'right nowrap'),
+	'f.total_localtax2' => array('label' => $langs->transcountry('AmountLT2', $mysoc->country_code), 'checked' => 1, 'enabled' => $mysoc->localtax2_assuj == '1', 'position' => 120, 'search' => 'amount', 'sql' => 'f.localtax2', 'css' => 'right nowrap'),
+	'f.total_ttc' => array('label' => 'AmountTTC', 'checked' => 1, 'position' => 130, 'search' => 'amount', 'css' => 'right nowrap'),
+	'am' => array('label' => 'Received', 'checked' => 1, 'position' => 140, 'search' => 'amount', 'css' => 'right nowrap'),
+	'rtp' => array('label' => 'Rest', 'checked' => 1, 'position' => 150, 'search' => 'amount', 'css' => 'right nowrap'),
+	'f.fk_statut' => array('label' => 'Status', 'checked' => 1, 'position' => 160, 'search' => 'select', 'css' => 'center nowrap')
+);
+$arrayfields = dol_sort_array($arrayfields, 'position');
+$searchFilters = array();
+$searchParams = '';
+$resetFilters = GETPOSTISSET('button_removefilter_x');
+if (GETPOSTISSET('button_search_x') || $resetFilters) { $page = 0; $offset = 0; }
+foreach ($arrayfields as $field => $definition) {
+	if ($definition['search'] === 'entities') { continue; }
+	$name = 'search_'.str_replace('.', '_', $field);
+	$sqlfield = $definition['sql'] ?? $field;
+	if ($definition['search'] === 'date') {
+		$month = $resetFilters ? 0 : GETPOSTINT($name.'month');
+		$day = $resetFilters ? 0 : GETPOSTINT($name.'day');
+		$year = $resetFilters ? 0 : GETPOSTINT($name.'year');
+		$value = $month && $day && $year && checkdate($month, $day, $year) ? dol_mktime(0, 0, 0, $month, $day, $year) : '';
+		if ($value !== '') { $searchParams .= '&'.$name.'month='.$month.'&'.$name.'day='.$day.'&'.$name.'year='.$year; }
+	} else {
+		$value = $resetFilters ? '' : GETPOST($name, 'alphanohtml');
+		if (!is_string($value) || (in_array($definition['search'], array('select', 'payment'), true) && $value === '-1')) { $value = ''; }
+		if ($value !== '') { $searchParams .= '&'.$name.'='.urlencode($value); }
+	}
+	$searchFilters[$field] = $value;
+	if ($value !== '') { $customersOwedReport->searchFilters[$sqlfield] = $value; }
+}
+if ($resetFilters) { $customersOwedReport->selectedEntities = array(); }
+
 include DOL_DOCUMENT_ROOT . '/core/actions_changeselectedfields.inc.php';
 
 if (!$sortfield) {
@@ -203,14 +255,15 @@ if (!$sortorder) {
 	$sortorder = 'ASC';
 }
 
-$urlsource = $_SERVER['PHP_SELF'] . '?socid=' . $socid . '&sortfield=' . $sortfield . '&sortorder=' . $sortorder . '&date_end_month=' . $date_end_month . '&date_end_day=' . $date_end_day . '&date_end_year=' . $date_end_year . '&exclude_dp=' . $exclude_dp . '&only_late=' . $only_late . '&only_user=' . $only_user . '&only_salesrepresentative=' . $only_salesrepresentative;
+$urlsource = $_SERVER['PHP_SELF'] . '?socid=' . $socid . '&sortfield=' . $sortfield . '&sortorder=' . $sortorder . '&date_end_month=' . $date_end_month . '&date_end_day=' . $date_end_day . '&date_end_year=' . $date_end_year . '&exclude_dp=' . $exclude_dp . '&only_late=' . $only_late . '&only_user=' . $only_user . '&only_salesrepresentative=' . $only_salesrepresentative.$searchParams;
 
 if ($customersOwedReport->fetch_lines($socid, $sortfield, $sortorder, $user,
 	in_array($action, $mutatingActions, true) ? 0 : $limit, $offset) < 0) { accessforbidden($langs->trans('ErrorBadParameters')); }
 $title = $customersOwedReport->title;
 $entityParams = '';
 foreach ($customersOwedReport->selectedEntities as $selectedEntity) { $entityParams .= '&search_entities[]='.(int) $selectedEntity; }
-$urlsource .= $entityParams;
+$urlsource .= $entityParams.$searchParams;
+$param .= $searchParams;
 $param .= '&socid='.(int) $socid.'&date_end_month='.(int) $date_end_month.'&date_end_day='.(int) $date_end_day.'&date_end_year='.(int) $date_end_year.'&exclude_dp='.(int) $exclude_dp.'&only_late='.(int) $only_late.'&only_user='.(int) $only_user.'&only_salesrepresentative='.(int) $only_salesrepresentative.'&limit='.(int) $limit.$entityParams;
 
 // Build doc
@@ -260,7 +313,7 @@ if ($action == 'builddoc' && $genallowed) {
 				if (empty($donotredirect)) // This is set when include is done by bulk action
 				{
 					setEventMessages($langs->trans("FileGenerated"), null);
-					$urltoredirect = $_SERVER['PHP_SELF'] . '?model=' . $model . '&socid=' . $socid . '&sortfield=' . $sortfield . '&sortorder=' . $sortorder . '&date_end_month=' . $date_end_month . '&date_end_day=' . $date_end_day . '&date_end_year=' . $date_end_year . '&exclude_dp=' . $exclude_dp . '&only_late=' . $only_late . '&only_user=' . $only_user . '&only_salesrepresentative=' . $only_salesrepresentative;
+					$urltoredirect = $_SERVER['PHP_SELF'] . '?model=' . $model . '&socid=' . $socid . '&sortfield=' . $sortfield . '&sortorder=' . $sortorder . '&date_end_month=' . $date_end_month . '&date_end_day=' . $date_end_day . '&date_end_year=' . $date_end_year . '&exclude_dp=' . $exclude_dp . '&only_late=' . $only_late . '&only_user=' . $only_user . '&only_salesrepresentative=' . $only_salesrepresentative.$searchParams;
 					$urltoredirect .= $entityParams;
 					$urltoredirect = preg_replace('/#builddoc$/', '', $urltoredirect);
 					$urltoredirect = preg_replace('/action=builddoc&?/', '', $urltoredirect); // To avoid infinite loop
@@ -404,54 +457,6 @@ if (in_array($action, array('send_mail_to_customer', 'send_mail_to_user', 'send_
 	header('Location: '.$urlsource);
 	exit();
 }
-$arrayfields = array(
-	'p.ref' => array('label' => $langs->trans("ProjectRef"), 'checked' => 1, 'enabled' => (!isModEnabled('projet') ? 0 : 1), 'position' => 40),
-	'p.title' => array('label' => $langs->trans("ProjectLabel"), 'checked' => 0, 'enabled' => (!isModEnabled('projet') ? 0 : 1), 'position' => 40),
-	's.zip' => array(
-		'label' => $langs->trans("Zip"),
-		'checked' => 0),
-	's.town' => array(
-		'label' => $langs->trans("Town"),
-		'checked' => 0),
-	'f.ref_client' => array(
-		'label' => $langs->trans("RefCustomer"),
-		'checked' => 0),
-	'f.type' => array(
-		'label' => $langs->trans("Type"),
-		'checked' => 0),
-	'f.fk_mode_reglement' => array(
-		'label' => $langs->trans("PaymentMode"),
-		'checked' => 0),
-	'f.date' => array(
-		'label' => $langs->trans("DateInvoice"),
-		'checked' => 0),
-	'f.datec' => array(
-		'label' => $langs->trans("DateCreation"),
-		'checked' => 0,
-		'position' => 500),
-	'f.tms' => array(
-		'label' => $langs->trans("DateModificationShort"),
-		'checked' => 0,
-		'position' => 600),
-	'f.total_ht' => array(
-		'label' => $langs->trans("AmountHT"),
-		'checked' => getDolGlobalInt('CUSTOMERSOWEDREPORT_DEFAULT_FILTER_HT_COLUMN')), //
-	'f.total_vat' => array(
-		'label' => $langs->trans("AmountVAT"),
-		'checked' => 0),
-	'f.total_localtax1' => array(
-		'label' => $langs->transcountry("AmountLT1", $mysoc->country_code),
-		'checked' => 1,
-		'enabled' => ($mysoc->localtax1_assuj == "1")),
-	'f.total_localtax2' => array(
-		'label' => $langs->transcountry("AmountLT2", $mysoc->country_code),
-		'checked' => 1,
-		'enabled' => ($mysoc->localtax2_assuj == "1")),
-	'rtp' => array(
-		'label' => $langs->trans("Rest"),
-		'checked' => 1,
-		'position' => 700));
-
 // 'state.nom'=>array('label'=>$langs->trans("StateShort"), 'checked'=>0),
 // 'country.code_iso'=>array('label'=>$langs->trans("Country"), 'checked'=>0),
 // 'typent.code'=>array('label'=>$langs->trans("ThirdPartyType"), 'checked'=>0),
@@ -465,13 +470,27 @@ $arrayfields = array(
 $form = new Form($db);
 $formfile = new FormFile($db);
 
-$arrayfields['f.entity'] = array('label' => $langs->trans('CustomersOwedEnvironment'), 'checked' => $showEntities ? 1 : 0, 'enabled' => $showEntities);
-$varpage = $_SERVER["PHP_SELF"];
-$selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
+$arrayfields['f.entity']['enabled'] = $showEntities;
+$varpage = $contextpage;
+// Preserve the optional choices from the former selector when opening the full native list for the first time.
+$legacyPreference = 'MAIN_SELECTEDFIELDS_'.$_SERVER['PHP_SELF'];
+$newPreference = 'MAIN_SELECTEDFIELDS_'.$contextpage;
+if (empty($user->conf->{$newPreference}) && !empty($user->conf->{$legacyPreference})) {
+	$legacyFields = explode(',', $user->conf->{$legacyPreference});
+	foreach ($arrayfields as $field => &$definition) {
+		if (!in_array($field, array('f.entity', 'f.ref', 's.nom', 'f.date_lim_reglement', 'f.total_ttc', 'am', 'f.fk_statut'), true)) {
+			$definition['checked'] = in_array($field, $legacyFields, true) ? 1 : 0;
+		}
+	}
+	unset($definition);
+}
+$selectorOnLeft = getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN');
+$selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage, $selectorOnLeft);
+$visibleFields = array_filter($arrayfields, static function ($field) { return !empty($field['checked']); });
 
 llxHeader("", $langs->trans("ModuleCustomersOwedName"));
 
-print load_fiche_titre($langs->trans("ModuleCustomersOwedName"), '', 'title_accountancy.png');
+// The native list bar carries the single report title and invoice pictogram.
 
 print '<div class="fichecenter">';
 
@@ -484,6 +503,19 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 	print '<form method="POST" name="searchFormList" action="' . $_SERVER["PHP_SELF"] . '">';
 	print '<input type="hidden" name="token" value="' . newToken() . '">';
 	print '<input type="hidden" name="formfilteraction" id="formfilteraction" value="list">';
+	foreach ($searchFilters as $field => $value) {
+		if ($value === '' || isset($visibleFields[$field])) { continue; }
+		$name = 'search_'.str_replace('.', '_', $field);
+		if ($arrayfields[$field]['search'] === 'date') {
+			foreach (array('month' => '%m', 'day' => '%d', 'year' => '%Y') as $suffix => $format) {
+				print '<input type="hidden" name="'.$name.$suffix.'" value="'.dol_print_date($value, $format).'">';
+			}
+		} else { print '<input type="hidden" name="'.$name.'" value="'.dol_escape_htmltag((string) $value).'">'; }
+	}
+
+	if (!isset($visibleFields['f.entity'])) {
+		foreach ($customersOwedReport->selectedEntities as $entity) { print '<input type="hidden" name="search_entities[]" value="'.(int) $entity.'">'; }
+	}
 	print '<input type="hidden" name="sortfield" value="' . $sortfield . '">';
 	print '<input type="hidden" name="sortorder" value="' . $sortorder . '">';
 	print '<input type="hidden" name="exclude_dp" value="'.(int) $exclude_dp.'">';
@@ -493,12 +525,8 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 		.'&date_end_year='.(int) $date_end_year.'&date_end_month='.(int) $date_end_month.'&date_end_day='.(int) $date_end_day.$entityParams;
 	// Native navigation expects one extra row when another page exists.
 	$navigationRows = min($limit + 1, max(0, $customersOwedReport->total_rows - $offset));
-	print_barre_liste($title, $page, $_SERVER['PHP_SELF'], $paginationParams, $sortfield, $sortorder, '',
-		$navigationRows, $customersOwedReport->total_rows, '', 0, '', '', $limit);
-	if ($showEntities) {
-		print $form->multiselectarray('search_entities', $entityLabels, $customersOwedReport->selectedEntities, 0, 0, 'minwidth200');
-		print '<input type="submit" class="button" value="'.$langs->trans('Search').'">';
-	}
+	print_barre_liste($title, $page, $_SERVER['PHP_SELF'], $paginationParams.$searchParams, $sortfield, $sortorder, '',
+		$navigationRows, $customersOwedReport->total_rows, 'bill', 0, '', '', $limit);
 	print '<div class="fichecenter">';
 
 	/*
@@ -512,11 +540,11 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 	 * print '</div>';
 	 */
 
-	print '<div class="titre">' . $title . '</div>';
-	print '<table class="noborder valid tableforfield" width="100%">';
+	print '<div class="div-table-responsive-no-min">';
+	print '<table class="tagtable liste centpercent" id="customersowed-parameters">';
 
 	// Date
-	print '<tr>';
+	print '<tr class="oddeven">';
 	print '<td class="">' . $langs->trans('Date') . '</td>';
 	print '<td>';
 	if ((float) DOL_VERSION >= 9) {
@@ -528,21 +556,21 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 	print '</tr>';
 
 	// Exclude down payment invoices
-	print '<tr class="">';
+	print '<tr class="oddeven">';
 	print '<td class="">' . $langs->trans('ExcludeDownpaymentInvoices') . ' </td>';
 	$switchUrl = preg_replace('/([?&])exclude_dp=[^&]*/', '$1exclude_dp='.($exclude_dp > 0 ? '0' : '1'), $urlsource);
 	print '<td><a href="'.dol_escape_htmltag($switchUrl).'">'.img_picto($langs->trans($exclude_dp > 0 ? 'Enabled' : 'Disabled'), $exclude_dp > 0 ? 'on' : 'off').'</a></td>';
 	print '</tr>';
 
 	// Only late payment invoices
-	print '<tr>';
+	print '<tr class="oddeven">';
 	print '<td class="">' . $langs->trans('OnlyLatePaymentInvoices') . ' </td>';
 	$switchUrl = preg_replace('/([?&])only_late=[^&]*/', '$1only_late='.($only_late > 0 ? '0' : '1'), $urlsource);
 	print '<td><a href="'.dol_escape_htmltag($switchUrl).'">'.img_picto($langs->trans($only_late > 0 ? 'Enabled' : 'Disabled'), $only_late > 0 ? 'on' : 'off').'</a></td>';
 	print '</tr>';
 
 	// Thirdparty
-	print '<tr>';
+	print '<tr class="oddeven">';
 	print '<td>' . $langs->trans('OnlyInvoicesToThisCustomer') . '</td>';
 	print '<td>';
 	if (intval(DOL_VERSION) < 18) {
@@ -559,7 +587,7 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 
 	if (getDolGlobalString('CUSTOMERSOWEDREPORT_ONLY_CREATED_BY')) {
 		// Only invoices created by
-		print '<tr class="">';
+		print '<tr class="oddeven">';
 		print '<td class="">' . $langs->trans('OnlyInvoicesCreatedBy') . ' </td>';
 		print '<td>';
 		print $form->select_dolusers($only_user, 'only_user', 1);
@@ -572,7 +600,7 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 
 	if (getDolGlobalString('CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE')) {
 		// only invoices whose sales representative is
-		print '<tr class="">';
+		print '<tr class="oddeven">';
 		print '<td class="">' . $langs->trans('OnlyInvoicesWhoseSalesRepresentativeIs') . ' </td>';
 		print '<td>';
 		print $form->select_dolusers($only_salesrepresentative, 'only_salesrepresentative', 1);
@@ -583,102 +611,45 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 		print '</tr>';
 	}
 
-	print '</tr>';
-	print '</table>';
-	// Refresh button
-	print '<table class="noborder" width="100%">';
-	print '<td class="center"><input type="submit" name="customersowed_refresh_button" class="button" value="' . $langs->trans("CustomersowedInvoicesListActualize") . '"></td>';
-	print '</table>';
+	print '</table></div>';
+	print '<div class="center"><input type="submit" name="customersowed_refresh_button" class="button" value="' . $langs->trans('CustomersowedInvoicesListActualize') . '"></div>';
 
 	$num = $customersOwedReport->lines_count;
 
 	print '<div class="div-table-responsive-no-min">';
-	print '<table class="noborder" width="100%">';
-	print '<tr class="liste_titre">';
-	if (!empty($arrayfields['f.entity']['checked'])) { print_liste_field_titre($arrayfields['f.entity']['label'], $_SERVER['PHP_SELF'], 'f.entity', '', $param, '', $sortfield, $sortorder); }
-	print_liste_field_titre($langs->trans('InvoiceRef'), $_SERVER['PHP_SELF'], 'f.ref', '', $param, 'align="left"', $sortfield, $sortorder);
-	print_liste_field_titre($langs->trans('ThirdParty'), $_SERVER['PHP_SELF'], 's.nom', '', $param, 'align="left"', $sortfield, $sortorder);
-
-	if (!empty($arrayfields['p.ref']['checked'])) {
-		print_liste_field_titre($arrayfields['p.ref']['label'], $_SERVER["PHP_SELF"], 'p.ref', '', $param, 'align="center"', $sortfield, $sortorder);
+	print '<table class="tagtable nobottomiftotal liste centpercent" id="customersowed-list">';
+	print '<tr class="liste_titre_filter">';
+	if ($selectorOnLeft) { print '<td class="liste_titre center maxwidthsearch">'.$form->showFilterButtons('left').'</td>'; }
+	foreach ($visibleFields as $field => $definition) {
+		$name = 'search_'.str_replace('.', '_', $field);
+		$value = $searchFilters[$field] ?? '';
+		print '<td class="liste_titre '.($definition['css'] ?? '').'">';
+		switch ($definition['search']) {
+			case 'entities': print $form->multiselectarray('search_entities', $entityLabels, $customersOwedReport->selectedEntities, 0, 0, 'minwidth100'); break;
+			case 'date': print $form->selectDate($value, $name, 0, 0, 1, '', 1, 0); break;
+			case 'payment': print $form->select_types_paiements($value, $name, '', 0, 1, 1, 0, 1, 'maxwidth100', 1); break;
+			case 'select':
+				$options = $field === 'f.type' ? array(Facture::TYPE_STANDARD => $langs->trans('InvoiceStandard'), Facture::TYPE_REPLACEMENT => $langs->trans('InvoiceReplacement'), Facture::TYPE_CREDIT_NOTE => $langs->trans('InvoiceAvoir'), Facture::TYPE_DEPOSIT => $langs->trans('InvoiceDeposit'), Facture::TYPE_SITUATION => $langs->trans('InvoiceSituation'))
+					: array(Facture::STATUS_VALIDATED => $langs->trans('BillStatusNotPaid'), Facture::STATUS_CLOSED => $langs->trans('BillStatusPaid'));
+				print $form->selectarray($name, $options, $value, 1, 0, 0, '', 0, 0, 0, '', 'maxwidth100');
+				print ajax_combobox($name); break;
+			default: print '<input class="flat maxwidth75" type="text" name="'.$name.'" aria-label="'.dol_escape_htmltag($langs->trans($definition['label'])).'" value="'.dol_escape_htmltag((string) $value).'">';
+		}
+		print '</td>';
 	}
-
-	if (!empty($arrayfields['p.title']['checked'])) {
-		print_liste_field_titre($arrayfields['p.title']['label'], $_SERVER["PHP_SELF"], 'p.title', '', $param, 'align="center"', $sortfield, $sortorder);
-	}
-
-	if (!empty($arrayfields['s.zip']['checked'])) {
-		print_liste_field_titre($arrayfields['s.zip']['label'], $_SERVER["PHP_SELF"], 's.zip', '', $param, 'align="center"', $sortfield, $sortorder);
-	}
-
-	if (!empty($arrayfields['s.town']['checked'])) {
-		print_liste_field_titre($arrayfields['s.town']['label'], $_SERVER["PHP_SELF"], 's.town', '', $param, 'align="center"', $sortfield, $sortorder);
-	}
-
-	if (!empty($arrayfields['f.ref_client']['checked'])) {
-		print_liste_field_titre($arrayfields['f.ref_client']['label'], $_SERVER["PHP_SELF"], 'f.ref_client', '', $param, 'align="center"', $sortfield, $sortorder);
-	}
-
-	if (!empty($arrayfields['f.type']['checked'])) {
-		print_liste_field_titre($arrayfields['f.type']['label'], $_SERVER["PHP_SELF"], 'f.type', '', $param, 'align="center"', $sortfield, $sortorder);
-	}
-
-	if (!empty($arrayfields['f.fk_mode_reglement']['checked'])) {
-		print_liste_field_titre($arrayfields['f.fk_mode_reglement']['label'], $_SERVER["PHP_SELF"], "f.fk_mode_reglement", "", $param, 'align="center"', $sortfield, $sortorder);
-	}
-
-	if (!empty($arrayfields['f.date']['checked'])) {
-		print_liste_field_titre($arrayfields['f.date']['label'], $_SERVER['PHP_SELF'], 'f.datef', '', $param, 'align="center"', $sortfield, $sortorder);
-	}
-
-	if (!empty($arrayfields['f.datec']['checked'])) {
-		print_liste_field_titre($arrayfields['f.datec']['label'], $_SERVER["PHP_SELF"], "f.datec", "", $param, 'align="center" class="nowrap"', $sortfield, $sortorder);
-	}
-
-	if (!empty($arrayfields['f.tms']['checked'])) {
-		print_liste_field_titre($arrayfields['f.tms']['label'], $_SERVER["PHP_SELF"], "f.tms", "", $param, 'align="center" class="nowrap"', $sortfield, $sortorder);
-	}
-
-	print_liste_field_titre($langs->trans("DateDue"), $_SERVER["PHP_SELF"], 'f.date_lim_reglement', '', $param, 'align="center"', $sortfield, $sortorder);
-	// if (! empty($arrayfields['p.ref']['checked'])) print_liste_field_titre($arrayfields['p.ref']['label'],$_SERVER['PHP_SELF'],"p.ref",'',$param,'align="center"',$sortfield,$sortorder);
-	// if (! empty($arrayfields['state.nom']['checked'])) print_liste_field_titre($arrayfields['state.nom']['label'],$_SERVER["PHP_SELF"],"state.nom","",$param,'align="center"',$sortfield,$sortorder);
-	// if (! empty($arrayfields['country.code_iso']['checked'])) print_liste_field_titre($arrayfields['country.code_iso']['label'],$_SERVER["PHP_SELF"],"country.code_iso","",$param,'align="center"',$sortfield,$sortorder);
-	// if (! empty($arrayfields['typent.code']['checked'])) print_liste_field_titre($arrayfields['typent.code']['label'],$_SERVER["PHP_SELF"],"typent.code","",$param,'align="center"',$sortfield,$sortorder);
-	if (!empty($arrayfields['f.total_ht']['checked'])) {
-		print_liste_field_titre($arrayfields['f.total_ht']['label'], $_SERVER['PHP_SELF'], 'f.total', '', $param, 'align="right"', $sortfield, $sortorder);
-	}
-
-	if (!empty($arrayfields['f.total_vat']['checked'])) {
-		print_liste_field_titre($arrayfields['f.total_vat']['label'], $_SERVER['PHP_SELF'], 'f.tva', '', $param, 'align="right"', $sortfield, $sortorder);
-	}
-
-	if (!empty($arrayfields['f.total_localtax1']['checked'])) {
-		print_liste_field_titre($arrayfields['f.total_localtax1']['label'], $_SERVER['PHP_SELF'], 'f.localtax1', '', $param, 'align="right"', $sortfield, $sortorder);
-	}
-
-	if (!empty($arrayfields['f.total_localtax2']['checked'])) {
-		print_liste_field_titre($arrayfields['f.total_localtax2']['label'], $_SERVER['PHP_SELF'], 'f.localtax2', '', $param, 'align="right"', $sortfield, $sortorder);
-	}
-
-	print_liste_field_titre($langs->trans("AmountTTC"), $_SERVER["PHP_SELF"], 'f.total_ttc', '', $param, 'align="right"', $sortfield, $sortorder);
-	print '<th align="right">' . $langs->trans("Received") . '</th>';
-	if (!empty($arrayfields['rtp']['checked'])) {
-		print_liste_field_titre($arrayfields['rtp']['label'], $_SERVER['PHP_SELF'], '', '', $param, 'align="right"', $sortfield, $sortorder);
-	}
-
-	print_liste_field_titre($langs->trans('Status').$selectedfields, $_SERVER["PHP_SELF"], "", '', '', 'align="center"', $sortfield, $sortorder);
-
-	// Extra fields
-
-	// Hook fields
-	$parameters = array(
-		'arrayfields' => $arrayfields,
-		'param' => $param,
-		'sortfield' => $sortfield,
-		'sortorder' => $sortorder);
-	$reshook = $hookmanager->executeHooks('printFieldListTitle', $parameters); // Note that $action and $object may have been modified by hook
+	$parameters = array('arrayfields' => $arrayfields);
+	$hookmanager->executeHooks('printFieldListOption', $parameters);
 	print $hookmanager->resPrint;
-
+	if (!$selectorOnLeft) { print '<td class="liste_titre center maxwidthsearch">'.$form->showFilterButtons().'</td>'; }
+	print '</tr><tr class="liste_titre">';
+	if ($selectorOnLeft) { print_liste_field_titre($selectedfields, $_SERVER['PHP_SELF'], '', '', '', 'class="center maxwidthsearch"'); }
+	foreach ($visibleFields as $field => $definition) {
+		print_liste_field_titre($langs->trans($definition['label']), $_SERVER['PHP_SELF'], $definition['sql'] ?? $field, '', $param, '', $sortfield, $sortorder, $definition['css'] ?? '');
+	}
+	$parameters = array('arrayfields' => $arrayfields, 'param' => $param, 'sortfield' => $sortfield, 'sortorder' => $sortorder);
+	$hookmanager->executeHooks('printFieldListTitle', $parameters);
+	print $hookmanager->resPrint;
+	if (!$selectorOnLeft) { print_liste_field_titre($selectedfields, $_SERVER['PHP_SELF'], '', '', '', 'class="center maxwidthsearch"'); }
 	print '</tr>';
 
 	if ($num > 0) {
@@ -718,9 +689,9 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 				$remaintopay = price2num($obj->total_ttc - $obj->am, 'MT');
 
 				print '<tr class="oddeven">';
-				if (!empty($arrayfields['f.entity']['checked'])) {
-					print '<td align="center"><div class="refidno multicompany-entity-card-container"><span class="fa fa-globe"></span><span class="multiselect-selected-title-text">'.dol_escape_htmltag($entityLabels[(int) $obj->entity] ?? '').'</span></div></td>';
-				}
+				if ($selectorOnLeft) { print '<td></td>'; }
+				foreach ($visibleFields as $field => $definition) {
+					if ($field === 'f.ref') {
 				print '<td class="nowrap">';
 
 				print '<table class="nobordernopadding"><tr class="nocellnopadd">';
@@ -745,156 +716,35 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 				print '</td></tr></table>';
 				print '</td>';
 
-				print '<td align="left">';
-				print $societestatic->getNomUrl(1, 'customer', 44);
-				print '</td>';
-
-				// project_ref
-				if (!empty($arrayfields['p.ref']['checked'])) {
-					print '<td align="center" class="nocellnopadd">';
-					print dol_escape_htmltag($obj->project_ref ?? '');
+						continue;
+					}
+					print '<td class="'.($definition['css'] ?? '').'">';
+					switch ($field) {
+						case 'f.entity': print '<div class="refidno multicompany-entity-card-container"><span class="fa fa-globe"></span><span class="multiselect-selected-title-text">'.dol_escape_htmltag($entityLabels[(int) $obj->entity] ?? '').'</span></div>'; break;
+						case 's.nom': print $societestatic->getNomUrl(1, 'customer', 44); break;
+						case 'p.ref': print dol_escape_htmltag($obj->project_ref ?? ''); break;
+						case 'p.title': print dol_escape_htmltag($obj->project_label ?? ''); break;
+						case 's.zip': print dol_escape_htmltag($obj->zip ?? ''); break;
+						case 's.town': print dol_escape_htmltag($obj->town ?? ''); break;
+						case 'f.ref_client': print dol_escape_htmltag($obj->ref_client ?? ''); break;
+						case 'f.type': print $facturestatic->getLibType(); break;
+						case 'f.fk_mode_reglement': $form->form_modes_reglement($_SERVER['PHP_SELF'], $obj->fk_mode_reglement, 'none', '', -1); break;
+						case 'f.date': print dol_print_date($db->jdate($obj->date), 'day'); break;
+						case 'f.datec': print dol_print_date($db->jdate($obj->date_creation), 'dayhour', 'tzuser'); break;
+						case 'f.tms': print dol_print_date($db->jdate($obj->date_update), 'dayhour', 'tzuser'); break;
+						case 'f.date_lim_reglement': print dol_print_date($db->jdate($obj->date_lim_reglement), 'day'); break;
+						case 'am': print price($obj->am); break;
+						case 'rtp': print price($remaintopay); break;
+						case 'f.fk_statut': print $facturestatic->LibStatut($obj->paye, $obj->fk_statut, 6, $obj->am); break;
+						default: $property = substr($field, 2); print price($obj->{$property});
+					}
 					print '</td>';
 				}
-
-				// project_label
-				if (!empty($arrayfields['p.title']['checked'])) {
-					print '<td align="center" class="nocellnopadd">';
-					print dol_escape_htmltag($obj->project_label ?? '');
-					print '</td>';
-				}
-
-				// Zip
-				if (!empty($arrayfields['s.zip']['checked'])) {
-					print '<td align="center" class="nocellnopadd">';
-					print $obj->zip;
-					print '</td>';
-				}
-
-				// Town
-				if (!empty($arrayfields['s.town']['checked'])) {
-					print '<td class="nocellnopadd">';
-					print $obj->town;
-					print '</td>';
-				}
-
-				// Customer ref
-				if (!empty($arrayfields['f.ref_client']['checked'])) {
-					print '<td align="center" class="nowrap">';
-					print $obj->ref_client;
-					print '</td>';
-				}
-
-				// Type
-				if (!empty($arrayfields['f.type']['checked'])) {
-					print '<td align="center" class="nowrap">';
-					print $facturestatic->getLibType();
-					print "</td>";
-				}
-
-				// Payment mode
-				if (!empty($arrayfields['f.fk_mode_reglement']['checked'])) {
-					print '<td align="center">';
-					$form->form_modes_reglement($_SERVER['PHP_SELF'], $obj->fk_mode_reglement, 'none', '', -1);
-					print '</td>';
-				}
-
-				// Date invoice
-				if (!empty($arrayfields['f.date']['checked'])) {
-					print '<td align="center" class="nowrap">';
-					print dol_print_date($db->jdate($obj->date), 'day');
-					print '</td>';
-				}
-
-				// Date creation
-				if (!empty($arrayfields['f.datec']['checked'])) {
-					print '<td align="center" class="nowrap">';
-					print dol_print_date($db->jdate($obj->date_creation), 'dayhour', 'tzuser');
-					print '</td>';
-				}
-
-				// Date modification
-				if (!empty($arrayfields['f.tms']['checked'])) {
-					print '<td align="center" class="nowrap">';
-					print dol_print_date($db->jdate($obj->date_update), 'dayhour', 'tzuser');
-					print '</td>';
-				}
-
-				// DateDue
-				print '<td align="center">' . dol_print_date($db->jdate($obj->date_lim_reglement), 'day') . '</td>';
-
-				// Project
-				if (!empty($arrayfields['p.ref']['checked'])) {
-					// print '<td class="nowrap">';
-					// if ($obj->project_id > 0)
-					// {
-					// $projectstatic->id=$obj->project_id;
-					// $projectstatic->ref=$obj->project_ref;
-					// $projectstatic->title=$obj->project_label;
-					// print $projectstatic->getNomUrl(1);
-					// }
-					// print '</td>';
-				}
-
-				// State
-				if (!empty($arrayfields['state.nom']['checked'])) {
-					// print "<td>".$obj->state_name."</td>\n";
-				}
-
-				// Country
-				if (!empty($arrayfields['country.code_iso']['checked'])) {
-					// print '<td align="center">';
-					// $tmparray=getCountry($obj->fk_pays,'all');
-					// print $tmparray['label'];
-					// print '</td>';
-				}
-
-				// Type ent
-				if (!empty($arrayfields['typent.code']['checked'])) {
-					// print '<td align="center">';
-					// if (count($typenArray)==0) $typenArray = $formcompany->typent_array(1);
-					// print $typenArray[$obj->typent_code];
-					// print '</td>';
-				}
-
-				// Amount HT
-				if (!empty($arrayfields['f.total_ht']['checked'])) {
-					print '<td align="right">' . price($obj->total_ht) . "</td>\n";
-				}
-
-				// Amount VAT
-				if (!empty($arrayfields['f.total_vat']['checked'])) {
-					print '<td align="right">' . price($obj->total_vat) . "</td>\n";
-				}
-
-				// Amount LocalTax1
-				if (!empty($arrayfields['f.total_localtax1']['checked'])) {
-					print '<td align="right">' . price($obj->total_localtax1) . "</td>\n";
-				}
-
-				// Amount LocalTax2
-				if (!empty($arrayfields['f.total_localtax2']['checked'])) {
-					print '<td align="right">' . price($obj->total_localtax2) . "</td>\n";
-				}
-
-				// Extra fields
-
-				// Amount TTC
-				print '<td align="right" class="nowrap">' . price($obj->total_ttc) . '</td>';
-
-				// Received is independent of the optional outstanding balance column.
-				print '<td align="right" class="nowrap">'.price($obj->am).'</td>';
-
-				// Rtp
-				if (!empty($arrayfields['rtp']['checked'])) {
-					print '<td align="right" class="nowrap">' . price($remaintopay, 0, $langs) . '</td>';
-				}
-
-				// Status
-				print '<td align="center" class="nowrap">' . $facturestatic->LibStatut($obj->paye, $obj->fk_statut, 6, $obj->am) . '</td>';
 				// Hook columns follow the same order as their headings.
 				$parameters = array('arrayfields' => $arrayfields, 'obj' => $obj);
 				$reshook = $hookmanager->executeHooks('printFieldListValue', $parameters);
 				print $hookmanager->resPrint;
+				if (!$selectorOnLeft) { print '<td></td>'; }
 				print '</tr>';
 
 				// Totals calc
@@ -908,88 +758,21 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 			}
 
 			print '<tr class="liste_total">';
-			if (!empty($arrayfields['f.entity']['checked'])) { print '<td></td>'; }
-			print '<td colspan="2">'.$langs->trans('Total').' ('.$langs->trans('Page').')</td>';
-			if (!empty($arrayfields['p.ref']['checked'])) { print '<td></td>'; }
-			if (!empty($arrayfields['p.title']['checked'])) { print '<td></td>'; }
-			// Zip
-			if (!empty($arrayfields['s.zip']['checked'])) {
-				print '<td></td>';
+			if ($selectorOnLeft) { print '<td></td>'; }
+			$pageTotals = array('f.total_ttc' => $total_ttc, 'f.total_ht' => $total_ht, 'f.total_vat' => $total_vat, 'am' => $total_amount, 'rtp' => $total_rtp);
+			$firstColumn = true;
+			foreach ($visibleFields as $field => $definition) {
+				print '<td class="'.($definition['css'] ?? '').'">';
+				if (isset($pageTotals[$field])) { print price($pageTotals[$field]); }
+				elseif ($firstColumn) { print $langs->trans('Total').' ('.$langs->trans('Page').')'; }
+				print '</td>';
+				$firstColumn = false;
 			}
-			// Town
-			if (!empty($arrayfields['s.town']['checked'])) {
-				print '<td></td>';
-			}
-			// Ref client
-			if (!empty($arrayfields['f.ref_client']['checked'])) {
-				print '<td></td>';
-			}
-			// Type
-			if (!empty($arrayfields['f.type']['checked'])) {
-				print '<td></td>';
-			}
-			// Payment mode
-			if (!empty($arrayfields['f.fk_mode_reglement']['checked'])) {
-				print '<td></td>';
-			}
-			// Date invoice
-			if (!empty($arrayfields['f.date']['checked'])) {
-				print '<td></td>';
-			}
-			// Date creation
-			if (!empty($arrayfields['f.datec']['checked'])) {
-				print '<td></td>';
-			}
-			// Date modification
-			if (!empty($arrayfields['f.tms']['checked'])) {
-				print '<td></td>';
-			}
-			// Datedue
-			print '<td>&nbsp;</td>';
-			// Project
-			if (!empty($arrayfields['p.ref']['checked'])) {
-				// print '<td class="nowrap">';
-				// print '</td>';
-			}
-			// State
-			if (!empty($arrayfields['state.nom']['checked'])) {
-				// print "<td>".$obj->state_name."</td>\n";
-			}
-			// Country
-			if (!empty($arrayfields['country.code_iso']['checked'])) {
-				// print '<td align="center">';
-				// print '</td>';
-			}
-			// Type ent
-			if (!empty($arrayfields['typent.code']['checked'])) {
-				// print '<td align="center">';
-				// print '</td>';
-			}
-			// Amount HT
-			if (!empty($arrayfields['f.total_ht']['checked'])) {
-				print '<td align="right">' . price($total_ht) . '</td>';
-			}
-			// Amount VAT
-			if (!empty($arrayfields['f.total_vat']['checked'])) {
-				print '<td align="right">' . price($total_vat) . '</td>';
-			}
-			// Amount LocalTax1
-			if (!empty($arrayfields['f.total_localtax1']['checked'])) {
-				print '<td></td>';
-			}
-			// Amount LocalTax2
-			if (!empty($arrayfields['f.total_localtax2']['checked'])) {
-				print '<td></td>';
-			}
-			print '<td align="right">' . price($total_ttc) . '</td>';
-			print '<td align="right">' . price($total_amount) . '</td>';
-			if (!empty($arrayfields['rtp']['checked'])) {
-				print '<td align="right" class="nowrap"><b>' . price($total_rtp) . '</b></td>';
-			}
-			print '<td></td>';
+			if (!$selectorOnLeft) { print '<td></td>'; }
 			print '</tr>';
+
 		} else {
-			$colspan = 6 + count(array_filter($arrayfields, static function ($field) { return !empty($field['checked']); }));
+			$colspan = 1 + count($visibleFields);
 			print '<tr class="oddeven"><td colspan="' . $colspan . '" class="opacitymedium">' . $langs->trans("NoRecordFound") . '</td></tr>';
 		}
 		print '</table>';
@@ -1009,7 +792,7 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 			setEventMessages($errorMessage, null, 'error');
 		}
 	} else {
-		print '<tr><td colspan="'.(6 + count(array_filter($arrayfields, static function ($field) { return !empty($field['checked']); }))).'" class="opacitymedium">' . $langs->trans('NoRecordFound') . '</td></tr>';
+		print '<tr><td colspan="'.(1 + count($visibleFields)).'" class="opacitymedium">' . $langs->trans('NoRecordFound') . '</td></tr>';
 		print '</table>';
 		print '</div>';
 		//setEventMessages("NoBalanceDue", null, 'mesgs');
@@ -1040,7 +823,7 @@ foreach ($arrayfields as $field => $value) {
 	}
 }
 
-$urlsource = $_SERVER['PHP_SELF'] . '?socid=' . $socid . '&sortfield=' . $sortfield . '&sortorder=' . $sortorder . '&columns=' . $columnsToAdd . '&date_end_month=' . $date_end_month . '&date_end_day=' . $date_end_day . '&date_end_year=' . $date_end_year . '&exclude_dp=' . $exclude_dp . '&only_late=' . $only_late . '&only_user=' . $only_user . '&only_salesrepresentative=' . $only_salesrepresentative;
+$urlsource = $_SERVER['PHP_SELF'] . '?socid=' . $socid . '&sortfield=' . $sortfield . '&sortorder=' . $sortorder . '&columns=' . $columnsToAdd . '&date_end_month=' . $date_end_month . '&date_end_day=' . $date_end_day . '&date_end_year=' . $date_end_year . '&exclude_dp=' . $exclude_dp . '&only_late=' . $only_late . '&only_user=' . $only_user . '&only_salesrepresentative=' . $only_salesrepresentative.$searchParams;
 
 $urlsource .= $entityParams;
 if ($user->hasRight('customersowed', 'read')) {

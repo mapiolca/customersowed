@@ -50,6 +50,8 @@ class CustomersOwed extends CommonObject
 	public $module = 'customersowed';
 	/** @var list<int> Selected invoice entities, constrained by native sharing. */
 	public $selectedEntities = array();
+	/** @var array<string,string|int> Validated per-column report filters. */
+	public $searchFilters = array();
 
 	public $statut = 1;
 
@@ -214,7 +216,7 @@ class CustomersOwed extends CommonObject
 		}
 		$allowedSorts = array('f.rowid', 'f.ref', 'f.ref_client', 'f.type', 'f.datef',
 			'f.datec', 'f.tms', 'f.date_lim_reglement', 'f.fk_mode_reglement', 'f.total_ht',
-			'f.total_tva', 'f.total_ttc', 'f.localtax1', 'f.localtax2', 's.nom', 's.zip', 's.town', 'pr.ref', 'pr.title', 'f.entity');
+			'f.total_tva', 'f.total_ttc', 'f.localtax1', 'f.localtax2', 's.nom', 's.zip', 's.town', 'pr.ref', 'pr.title', 'f.entity', 'f.fk_statut', 'am', 'rtp');
 		$aliases = array('p.ref' => 'pr.ref', 'p.title' => 'pr.title', 'f.total' => 'f.total_ht', 'f.facnumber' => 'f.ref',
 			'f.tva' => 'f.total_tva', 'f.total_localtax1' => 'f.localtax1', 'f.total_localtax2' => 'f.localtax2');
 		$fields = explode(',', $sortfield ?: 'f.date_lim_reglement');
@@ -228,7 +230,9 @@ class CustomersOwed extends CommonObject
 				$this->error = $langs->trans('ErrorBadParameters');
 				return -1;
 			}
-			$orderSql[] = $field.' '.$order;
+			$expression = $field === 'am' ? '(COALESCE(pay.amount, 0) + COALESCE(credit.amount, 0))'
+				: ($field === 'rtp' ? '(f.total_ttc - COALESCE(pay.amount, 0) - COALESCE(credit.amount, 0))' : $field);
+			$orderSql[] = $expression.' '.$order;
 		}
 		$this->customersOwedDateSql = dol_print_date($this->customersOwedDate, '%Y-%m-%d').' 23:59:59';
 		$cutoff = $this->db->escape($this->customersOwedDateSql);
@@ -271,6 +275,8 @@ class CustomersOwed extends CommonObject
 		$sql .= " WHERE r.datec <= '".$cutoff."' AND r.fk_facture_source > 0 AND (r.fk_facture > 0 OR r.fk_facture_line > 0)";
 		$sql .= ') used GROUP BY used.fk_facture) credit ON credit.fk_facture = f.rowid';
 		$sql .= ' WHERE f.fk_statut IN ('.Facture::STATUS_VALIDATED.', '.Facture::STATUS_CLOSED.')';
+		// Native closed credit notes are refunded or converted to available credit, not outstanding invoices.
+		$sql .= ' AND NOT (f.type = '.Facture::TYPE_CREDIT_NOTE.' AND f.fk_statut = '.Facture::STATUS_CLOSED.')';
 		$sql .= ' AND f.total_ttc <> COALESCE(pay.amount, 0) + COALESCE(credit.amount, 0)';
 		$sql .= ' AND f.entity IN ('.implode(',', $entities).')';
 		$sql .= ' AND s.entity IN ('.$this->db->sanitize(getEntity('societe')).')';
@@ -294,6 +300,25 @@ class CustomersOwed extends CommonObject
 		if ($this->onlyInvoicesWhoseSalesRepresentativeIs > 0) {
 			$sql .= ' AND EXISTS (SELECT 1 FROM '.MAIN_DB_PREFIX.'societe_commerciaux sc';
 			$sql .= ' WHERE sc.fk_soc = s.rowid AND sc.fk_user = '.((int) $this->onlyInvoicesWhoseSalesRepresentativeIs).')';
+		}
+		$textFilters = array('f.ref', 'f.ref_client', 's.nom', 's.zip', 's.town', 'pr.ref', 'pr.title');
+		$amountFilters = array('f.total_ht', 'f.total_tva', 'f.total_ttc', 'f.localtax1', 'f.localtax2', 'am', 'rtp');
+		$dateFilters = array('f.datef', 'f.datec', 'f.tms', 'f.date_lim_reglement');
+		foreach ($this->searchFilters as $field => $value) {
+			if (!is_string($value) && !is_int($value)) { $this->error = 'ErrorBadParameters'; return -1; }
+			if ($value === '') { continue; }
+			if (in_array($field, $textFilters, true)) {
+				$sql .= natural_search($field, (string) $value);
+			} elseif (in_array($field, $amountFilters, true)) {
+				$expression = $field === 'am' ? '(COALESCE(pay.amount, 0) + COALESCE(credit.amount, 0))'
+					: ($field === 'rtp' ? '(f.total_ttc - COALESCE(pay.amount, 0) - COALESCE(credit.amount, 0))' : $field);
+				$sql .= natural_search($expression, (string) $value, 1);
+			} elseif (in_array($field, array('f.type', 'f.fk_statut', 'f.fk_mode_reglement'), true) && preg_match('/^\d+$/D', (string) $value)) {
+				$sql .= ' AND '.$field.' = '.((int) $value);
+			} elseif (in_array($field, $dateFilters, true) && is_int($value) && $value > 0) {
+				$day = dol_print_date($value, '%Y-%m-%d');
+				$sql .= " AND ".$field." >= '".$this->db->escape($day)."' AND ".$field." <= '".$this->db->escape($day)." 23:59:59'";
+			} else { $this->error = 'ErrorBadParameters'; return -1; }
 		}
 		if (is_object($hookmanager)) {
 			$parameters = array();
@@ -346,7 +371,7 @@ class CustomersOwed extends CommonObject
 		// Filters and actor form part of the filename: scoped reports cannot overwrite one another.
 		$this->pdfreportfilename = dol_print_date($this->customersOwedDate, '%Y-%m-%d').'-'.substr(hash('sha256',
 			implode(',', $entities).'|'.$reportUser->id.'|'.$socid.'|'.(int) $this->excludeDpInvoices.'|'.(int) $this->onlyLatePaymentInvoices
-			.'|'.(int) $this->onlyInvoicesCreatedBy.'|'.(int) $this->onlyInvoicesWhoseSalesRepresentativeIs), 0, 20).'.pdf';
+			.'|'.(int) $this->onlyInvoicesCreatedBy.'|'.(int) $this->onlyInvoicesWhoseSalesRepresentativeIs.'|'.json_encode($this->searchFilters)), 0, 20).'.pdf';
 		return 1;
 	}
 

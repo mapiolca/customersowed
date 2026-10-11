@@ -8,6 +8,7 @@ FR
  - Protéger les rapports par utilisateur et entité, vérifier leur périmètre au téléchargement et réserver le pied de page natif dans les PDF ; régénération nécessaire des anciens rapports.
  - Préserver les réglages, modèles et cron ; migrer les droits utilisateurs/groupes de 423100/423101/423102 vers 42310001/42310002/42310003. Encadrer les envois périodiques et les reprises après résultat SMTP incertain.
  - Corriger la signature du widget pour éviter une erreur fatale avec le contrat `ModeleBoxes::loadBox($max = 5)` ; retirer les squelettes de démonstration et le log distribué.
+ - Adopter les tableaux natifs, un titre unique avec pictogramme facture, les filtres SQL par colonne, les tris sur reçu/créance et le positionnement natif du sélecteur ; exclure les avoirs clôturés du rapport, du widget et des envois sans perdre leurs imputations.
  - Corriger les colonnes SQL natives de taxes locales, la navigation paginée, le total de page et l'alignement des en-têtes/montants/totaux ; afficher les statuts avec leur texte et isoler les spécimens PDF par modèle. Recette partielle réussie sur Dolibarr 25.0.0-alpha/PHP 8.3.35 ; limites avant publication consignées dans V2.0.0-AUDIT.md.
 
 ## 1.4.3

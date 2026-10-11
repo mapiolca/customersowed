@@ -136,6 +136,29 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(rows[2]['total_ttc'] - rows[2]['ream'], 175)
         self.assertEqual(rows[5]['total_ttc'] - rows[5]['ream'], -25)
 
+    def test_closed_credit_notes_excluded_but_consumption_kept(self):
+        self.db.executescript("""
+            INSERT INTO erp_facture(rowid,entity,ref,fk_statut,type,fk_soc,datef,total_ttc)
+              VALUES(5,1,'Refunded',2,2,1,'2026-10-01',-50),
+                    (6,1,'OpenCredit',1,2,1,'2026-10-01',-20);
+            INSERT INTO erp_societe_remise_except(fk_facture,amount_ttc,datec,fk_facture_source)
+              VALUES(2,25,'2026-10-09',5);
+        """)
+        rows = {row['rowid']: row for row in self.rows('shared')}
+        self.assertNotIn(5, rows)
+        self.assertIn(6, rows)
+        self.assertEqual(rows[2]['ream'], 25)
+        count = self.rows('count')[0]
+        self.assertEqual((count['total_rows'], count['total_owed']), (4, 263))
+
+    def test_column_filters_apply_before_count_and_pagination(self):
+        self.assertEqual([r['rowid'] for r in self.rows('filter_text')], [1])
+        self.assertEqual([r['rowid'] for r in self.rows('filter_amount')], [2])
+        self.assertEqual(self.rows('count_amount')[0]['total_owed'], 200)
+        self.assertEqual([r['rowid'] for r in self.rows('filter_date')], [2, 1, 3])
+        self.assertEqual(self.rows('count_date')[0]['total_rows'], 3)
+        self.assertEqual(self.rows('filter_type'), [])
+
     def test_rights_migration_preserves_entities_and_is_replayable(self):
         self.db.executescript('''
             CREATE TABLE erp_user_rights(entity,fk_user,fk_id,UNIQUE(entity,fk_user,fk_id));
