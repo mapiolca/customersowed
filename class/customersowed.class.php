@@ -312,7 +312,9 @@ class CustomersOwed extends CommonObject
 			} elseif (in_array($field, $amountFilters, true)) {
 				$expression = $field === 'am' ? '(COALESCE(pay.amount, 0) + COALESCE(credit.amount, 0))'
 					: ($field === 'rtp' ? '(f.total_ttc - COALESCE(pay.amount, 0) - COALESCE(credit.amount, 0))' : $field);
-				$sql .= natural_search($expression, (string) $value, 1);
+				// Native searches accept identifiers; replace only our fixed computed column.
+				$condition = natural_search($field, (string) $value, 1);
+				$sql .= $expression === $field ? $condition : str_replace($field.' ', $expression.' ', $condition);
 			} elseif (in_array($field, array('f.type', 'f.fk_statut', 'f.fk_mode_reglement'), true) && preg_match('/^\d+$/D', (string) $value)) {
 				$sql .= ' AND '.$field.' = '.((int) $value);
 			} elseif (in_array($field, $dateFilters, true) && is_int($value) && $value > 0) {

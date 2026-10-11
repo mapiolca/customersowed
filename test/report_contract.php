@@ -42,6 +42,7 @@ function getEntity($element) { return '1,2'; }
 // Minimal native-search double for text and comparison scenarios, not a core integration test.
 function natural_search($field, $value, $numeric = 0) {
 	global $db;
+	if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_.]*$/D', $field)) { throw new RuntimeException('native search requires an identifier'); }
 	if ($numeric && preg_match('/^(>=|<=|>|<|=)?(-?\d+(?:\.\d+)?)$/D', $value, $match)) {
 		return ' AND '.$field.' '.($match[1] ?: '=').' '.$match[2];
 	}
