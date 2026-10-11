@@ -1,4 +1,5 @@
 <?php
+/* Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr> */
 /** Environment capabilities for the report (declarations, not instance test results). */
 class CustomersOwedCompatibility
 {

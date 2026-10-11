@@ -6,6 +6,7 @@
  * Copyright (C) 2016 Ferran Marcet <fmarcet@2byte.es>
  * Copyright (C) 2018 Nicolas ZABOURI <info@inovea-conseil.com>
  * Copyright (C) 2018 Laurent BOUQUET <dolibarr@joliciel.fr>
+ * Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

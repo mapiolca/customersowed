@@ -4,6 +4,7 @@
  * Copyright (C) 2006-2014 Laurent Destailleur <eldy@users.sourceforge.net>
  * Copyright (C) 2015 Charles-Fr BENKE <charles.fr@benke.fr>
  * Copyright (C) 2018 Laurent BOUQUET <dolibarr@joliciel.fr>
+ * Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

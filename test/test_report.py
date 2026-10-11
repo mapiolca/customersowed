@@ -1,3 +1,4 @@
+# Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr>
 """Execute generated production SQL against an isolated relational fixture.
 
 SQLite exercises query/migration semantics; this is not a MySQL/Dolibarr integration test.

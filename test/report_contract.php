@@ -1,4 +1,5 @@
 <?php
+/* Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr> */
 // Isolated test doubles: this runner never boots Dolibarr or sends mail.
 error_reporting(E_ALL & ~E_DEPRECATED);
 set_error_handler(static function ($severity, $message) { if (error_reporting() & $severity) { throw new RuntimeException($message); } });

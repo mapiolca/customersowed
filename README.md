@@ -1,3 +1,5 @@
+<!-- Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr> -->
+
 # Module 'Due Customers'
 
 ## Characteristics

@@ -1,3 +1,5 @@
+<!-- Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr> -->
+
 
 FR
 ## 2.0.0 — en préparation

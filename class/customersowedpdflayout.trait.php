@@ -1,4 +1,5 @@
 <?php
+/* Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr> */
 /** Reserve and render the native footer during the normal page lifecycle. */
 trait CustomersOwedPdfLayout
 {
