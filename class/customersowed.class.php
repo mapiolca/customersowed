@@ -359,7 +359,7 @@ class CustomersOwed extends CommonObject
 			$line->datec = $row->date_creation;
 			$line->date_lim_reglement = $row->datelimite;
 			$line->am = price2num($row->am + $row->ream, 'MT');
-			$line->paye = (int) $obj->paye;
+			$line->paye = (int) $row->paye;
 			$line->type = $row->type;
 			$line->country_code = $row->country_code;
 			$this->lines[] = $line;
