@@ -160,6 +160,71 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(self.rows('count_date')[0]['total_rows'], 3)
         self.assertEqual(self.rows('filter_type'), [])
 
+    def test_all_invoice_statuses_for_standard_and_situation(self):
+        # Partial payment is status 1 with payments, not a separate SQL status.
+        cases = [('draft', 0, 0, 0, False), ('unpaid', 1, 0, 0, True),
+                 ('partial', 1, 0, 35, True), ('paid', 2, 1, 100, False),
+                 ('abandoned', 3, 0, 0, False), ('zero', 1, 0, 0, False)]
+        for invoice_type in (0, 5):
+            for name, status, paid_flag, payment, expected in cases:
+                with self.subTest(invoice_type=invoice_type, status=name):
+                    self.db.execute('DELETE FROM erp_facture WHERE rowid=20')
+                    self.db.execute('DELETE FROM erp_paiement_facture WHERE fk_facture=20')
+                    total = 0 if name == 'zero' else 100
+                    self.db.execute('''INSERT INTO erp_facture
+                        (rowid,entity,ref,fk_statut,paye,type,fk_soc,datef,total_ttc)
+                        VALUES(20,1,?,?,?,?,1,'2026-10-01',?)''',
+                                    (name, status, paid_flag, invoice_type, total))
+                    if payment:
+                        self.db.execute('INSERT INTO erp_paiement_facture VALUES(20,1,?)', (payment,))
+                    rows = {r['rowid']: r for r in self.rows('shared')}
+                    self.assertEqual(20 in rows, expected)
+                    if expected:
+                        self.assertEqual(rows[20]['total_ttc'] - rows[20]['am'], total - payment)
+                    count = self.rows('count')[0]
+                    self.assertEqual(count['total_rows'], 3 + int(expected))
+                    self.assertEqual(count['total_owed'], 308 + (total - payment if expected else 0))
+
+    def test_situation_cycle_uses_each_native_increment_once(self):
+        # Core stores each invoice's increment; cumulative progress is not its TTC.
+        self.db.executescript('''
+            INSERT INTO erp_facture(rowid,entity,ref,fk_statut,type,fk_soc,datef,total_ttc)
+              VALUES(20,1,'S1',1,5,1,'2026-10-01',6616),
+                    (21,1,'S2',1,5,1,'2026-10-01',5292.8),
+                    (22,1,'S3',1,5,1,'2026-10-01',1323.2);
+            INSERT INTO erp_paiement_facture VALUES(21,1,95);
+            INSERT INTO erp_societe_remise_except(fk_facture,amount_ttc,datec)
+              VALUES(22,100,'2026-10-09');
+        ''')
+        rows = {r['rowid']: r for r in self.rows('shared') if r['rowid'] >= 20}
+        self.assertEqual(set(rows), {20, 21, 22})
+        self.assertAlmostEqual(sum(r['total_ttc'] for r in rows.values()), 13232)
+        self.assertAlmostEqual(sum(r['total_ttc'] - r['am'] - r['ream'] for r in rows.values()), 13037)
+        self.assertAlmostEqual(self.rows('count')[0]['total_owed'], 308 + 13037)
+
+    def test_paid_situation_reappears_before_payment_cutoff(self):
+        self.db.executescript('''
+            INSERT INTO erp_facture(rowid,entity,ref,fk_statut,paye,type,fk_soc,datef,total_ttc)
+              VALUES(20,1,'PaidLater',2,1,5,1,'2026-10-01',100),
+                    (21,1,'PaidBefore',2,1,5,1,'2026-10-01',100);
+            INSERT INTO erp_paiement_facture VALUES(20,3,100),(21,1,100);
+        ''')
+        rows = {r['rowid']: r for r in self.rows('shared')}
+        self.assertIn(20, rows)
+        self.assertNotIn(21, rows)
+        self.assertEqual(rows[20]['total_ttc'] - rows[20]['am'], 100)
+        # Historical amount is reconstructed, but the native current paid flag stays.
+        self.assertEqual(rows[20]['paye'], 1)
+
+    def test_credit_note_status_matrix(self):
+        for status in (0, 1, 2, 3):
+            with self.subTest(status=status):
+                self.db.execute('DELETE FROM erp_facture WHERE rowid=20')
+                self.db.execute('''INSERT INTO erp_facture
+                    (rowid,entity,ref,fk_statut,type,fk_soc,datef,total_ttc)
+                    VALUES(20,1,'Credit',?,2,1,'2026-10-01',-50)''', (status,))
+                self.assertEqual(20 in {r['rowid'] for r in self.rows('shared')}, status == 1)
+
     def test_rights_migration_preserves_entities_and_is_replayable(self):
         self.db.executescript('''
             CREATE TABLE erp_user_rights(entity,fk_user,fk_id,UNIQUE(entity,fk_user,fk_id));
