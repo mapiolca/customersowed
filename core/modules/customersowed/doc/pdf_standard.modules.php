@@ -32,16 +32,41 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 /**
  *	Classe permettant de generer un document PDF de 'Dû clients'
  */
+require_once __DIR__.'/../../../../class/customersowedpdflayout.trait.php';
+
 class pdf_standard
 {
+	use CustomersOwedPdfLayout;
+	public $db;
+	public $description;
+	public $format;
+	public $line_height;
+	public $line_per_page;
+	public $marge_basse;
+	public $marge_droite;
+	public $marge_gauche;
+	public $marge_haute;
+	public $name;
+	public $page_hauteur;
+	public $page_largeur;
+	public $posxCompany;
+	public $posxDateDue;
+	public $posxInvoiceAmountTTC;
+	public $posxLate;
+	public $posxLeft;
+	public $posxReceived;
+	public $result;
+	public $tabTop;
+	public $tab_height;
+	public $type;
 	public $doc_type;
 
 	public $documentDate;
-	
+
 	public $customersOwedDate;
-	
+
 	public  $title;
-	
+
 	public $excludeDpInvoices;
 
 	var $numberColumnsToAdd;
@@ -74,24 +99,24 @@ class pdf_standard
 		$this->description = $langs->trans('PDFStandardCustomersOwedsModel');
 
 		$this->warning_image_path = DOL_DOCUMENT_ROOT."/theme/".$conf->theme."/img/warning.png";
-		$CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME = $conf->global->CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME;
+		$CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME = getDolGlobalString('CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME');
 		if ($CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME) {
 			$this->warning_image_path = DOL_DOCUMENT_ROOT."/theme/".$conf->theme."/img/".$CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME.".png";
 		}
 		if ($CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME == 'none') {
 			$this->warning_image_path = "";
 		}
-		
+
 		// Dimension page pour format A4
 		$this->type = 'pdf';
 		$formatarray = pdf_getFormat();
 		$this->page_largeur = $formatarray['width'];
 		$this->page_hauteur = $formatarray['height'];
 		$this->format = array($this->page_largeur, $this->page_hauteur);
-		$this->marge_gauche = isset($conf->global->MAIN_PDF_MARGIN_LEFT) ? $conf->global->MAIN_PDF_MARGIN_LEFT : 10;
-		$this->marge_droite = isset($conf->global->MAIN_PDF_MARGIN_RIGHT) ? $conf->global->MAIN_PDF_MARGIN_RIGHT : 10;
-		$this->marge_haute = isset($conf->global->MAIN_PDF_MARGIN_TOP) ? $conf->global->MAIN_PDF_MARGIN_TOP : 10;
-		$this->marge_basse = isset($conf->global->MAIN_PDF_MARGIN_BOTTOM) ? $conf->global->MAIN_PDF_MARGIN_BOTTOM : 10;
+		$this->marge_gauche = getDolGlobalString('MAIN_PDF_MARGIN_LEFT') !== '' ? getDolGlobalString('MAIN_PDF_MARGIN_LEFT') : 10;
+		$this->marge_droite = getDolGlobalString('MAIN_PDF_MARGIN_RIGHT') !== '' ? getDolGlobalString('MAIN_PDF_MARGIN_RIGHT') : 10;
+		$this->marge_haute = getDolGlobalString('MAIN_PDF_MARGIN_TOP') !== '' ? getDolGlobalString('MAIN_PDF_MARGIN_TOP') : 10;
+		$this->marge_basse = getDolGlobalString('MAIN_PDF_MARGIN_BOTTOM') !== '' ? getDolGlobalString('MAIN_PDF_MARGIN_BOTTOM') : 10;
 
 		$this->tabTop = 20;
 
@@ -117,12 +142,12 @@ class pdf_standard
 		}
 		// which type of document will be generated: clients (client) or providers (fourn) invoices
 		$this->doc_type = "client";
-		
+
 		// Date for customers owed calculation
 		$this->customersOwedDate = dol_now();
-		
+
 		// Date of this document
-		$this->documentDate = dol_now();	
+		$this->documentDate = dol_now();
 	}
 
 	// Page footer
@@ -134,7 +159,7 @@ class pdf_standard
 		// Page number
 		$this->Cell(0, 10, 'Page ' . $this->getAliasNumPage() . '/' . $this->getAliasNbPages(), 0, 0, 'R');
 	}
-	
+
 	/**
 	 *	Fonction generant la rapport sur le disque
 	 *
@@ -146,43 +171,48 @@ class pdf_standard
 	function write_file($object, $file, $outputLangs, $socid=NULL, $sortfield=NULL, $sortorder=NULL)
 	{
 		dol_syslog(get_class($this)."::write_file", LOG_DEBUG);
-		
+
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 
 		global $conf, $hookmanager, $langs, $user;
+		if (!isModEnabled('customersowed') || !$user->hasRight('customersowed', 'write')) { $this->error = 'NotEnoughPermissions'; return -1; }
+		$expectedDirectory = $object->getReportDirectory($user);
+		if ($expectedDirectory === false || !is_string($file) || realpath(dirname($file)) !== realpath($expectedDirectory)
+			|| basename($file) !== $object->pdfreportfilename || is_link($file)) { $this->error = 'ErrorBadParameters'; return -1; }
 
-		
+
+
 		// Translations
 		$langs->loadLangs(array("main", "invoice", "payment"));
 
 		if (empty($socid)) {
-			if ($user->societe_id) {
+			if ($user->socid) {
 				$socid = $user->socid;
 			}
 		}
-		
+
 		if (empty($object->customersOwedDate)) {
 			$object->customersOwedDate = dol_now();
 		}
 		$this->customersOwedDate = $object->customersOwedDate;
 		$this->excludeDpInvoices = $object->excludeDpInvoices;
-		
-		if ($socid > 0) {
+
+		if ($socid > 0 && count(array_filter($object->lines, static function ($line) use ($socid) { return (int) $line->fk_soc === (int) $socid; })) > 0) {
 			$societe = new Societe($this->db);
-			$societe->fetch($socid);
-			if (empty($object->title)) {				
-				//$title = $outputLangs->transnoentities("BillsCustomersUnpaidForCompanyAtDateOf", $societe->name, dol_print_date(dol_now(), "%d/%m/%Y"));
+			if ($societe->fetch($socid) <= 0) { $this->error = 'ErrorRecordNotFound'; return -1; }
+			if (empty($object->title)) {
+				//$title = $outputLangs->transnoentities("BillsCustomersUnpaidForCompanyAtDateOf", $societe->name, dol_print_date(dol_now(), "day"));
 				$object->title = $outputLangs->transnoentities("BillsCustomersUnpaidForCompany", $societe->name);
 			}
 		}
 		else {
-			$object->title = $outputLangs->transnoentities("CustomersOwedAtDateOf", dol_print_date($this->customersOwedDate, "%d/%m/%Y"));
+			$object->title = $outputLangs->transnoentities("CustomersOwedAtDateOf", dol_print_date($this->customersOwedDate, "day"));
 		}
 		$this->title = $object->title;
 
 		if (! is_object($outputLangs)) $outputLangs=$langs;
 		// For backward compatibility with FPDF, force output charset to ISO, because FPDF expect text to be encoded in ISO
-		if (! empty($conf->global->MAIN_USE_FPDF)) $outputLangs->charset_output='ISO-8859-1';
+		if (getDolGlobalString('MAIN_USE_FPDF') !== '') $outputLangs->charset_output='ISO-8859-1';
 
 		// Add pdfgeneration hook
 		if (! is_object($hookmanager))
@@ -209,37 +239,39 @@ class pdf_standard
 		$pagenb=0;
 		$pdf->SetDrawColor(128,128,128);
 
-		$pdf->SetTitle($conf->global->MAIN_INFO_SOCIETE_NOM." - ".$outputLangs->transnoentities("CustomersOwedAtDateOf", dol_print_date(dol_now(), "%d/%m/%Y")));
+		$pdf->SetTitle(getDolGlobalString('MAIN_INFO_SOCIETE_NOM')." - ".$outputLangs->transnoentities("CustomersOwedAtDateOf", dol_print_date(dol_now(), "day")));
 		$pdf->SetSubject($outputLangs->transnoentities("ModuleCustomersOwed"));
 		$pdf->SetCreator("Dolibarr ".DOL_VERSION." (http://www.joliciel.fr)");
 		$pdf->SetAuthor($outputLangs->convToOutputCharset($user->getFullName($outputLangs)));
 		//$pdf->SetKeyWords();
-		if (! empty($conf->global->MAIN_DISABLE_PDF_COMPRESSION)) $pdf->SetCompression(false);
+		if (getDolGlobalString('MAIN_DISABLE_PDF_COMPRESSION') !== '') $pdf->SetCompression(false);
 
 		$pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
 		$pdf->SetAutoPageBreak(1,0);
 
 		// New page
 		$pdf->AddPage();
+		if (!$this->prepareReportLayout($pdf, $object, $outputLangs)) { return -1; }
 		$pagenb++;
 		$this->_pagehead($pdf, $pagenb, $outputLangs);
 		$pdf->SetFont('', '', 9);
 		$pdf->MultiCell(0, 3, '');		// Set interline to 3
 		$pdf->SetTextColor(0,0,0);
-		
+
 		///$customersOwedReport = new CustomersOwed($this->db);
 
 		///if ($customersOwedReport->fetch_lines($socid, $sortfield, $sortorder)) {
 		if ($object) {
 			$this->Body($pdf, 1, $object->lines, $outputLangs, $socid, $sortfield, $sortorder);
-		
+
 		}
 		else {
 			dol_print_error($object->error);
 		}
-		
+
 		if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
+		$this->_pagefoot($pdf, $object, $outputLangs, 0);
 		$pdf->Close();
 
 		$pdf->Output($file,'F');
@@ -255,8 +287,8 @@ class pdf_standard
 		global $action;
 		$reshook=$hookmanager->executeHooks('afterPDFCreation',$parameters,$this,$action);	// Note that $action and $object may have been modified by some hooks
 
-		if (! empty($conf->global->MAIN_UMASK))
-			@chmod($file, octdec($conf->global->MAIN_UMASK));
+		if (getDolGlobalString('MAIN_UMASK') !== '')
+			@chmod($file, octdec(getDolGlobalString('MAIN_UMASK')));
 
 		$this->result = array('fullpath'=>$file);
 
@@ -274,30 +306,27 @@ class pdf_standard
 	function _pagehead(&$pdf, $page, $outputLangs)
 	{
 		global $conf, $hookmanager, $langs, $user;
-		
+
 		$defaultFontSize = pdf_getPDFFontSize($outputLangs);
 		$pdf->SetFont('', '', $defaultFontSize-4);
-		
+
 		$pdf->SetXY($this->posxLeft, $this->marge_haute);
-		$pdf->Cell(80, 2, $conf->global->MAIN_INFO_SOCIETE_NOM, 0, 0, 'L');
-		
+		$pdf->Cell(80, 2, getDolGlobalString('MAIN_INFO_SOCIETE_NOM'), 0, 0, 'L');
+
 		$pdf->SetXY($this->page_largeur - $this->marge_droite - 80, $this->marge_haute);
 		$pdf->Cell(80, 2, dol_print_date(time(),"day",false,$outputLangs,true), 0, 0, 'R');
-		
-		$pdf->SetFont('', '', $defaultFontSize-2);
-		$pdf->SetXY($this->page_largeur - $this->marge_droite - 80, $this->page_hauteur - $this->marge_basse - $this->line_height);
-		$pdf->Cell(80, 2, $outputLangs->transnoentities("Page")." ".$page, 0, 0, 'R');
-		
-		// Title 
+
+
+		// Title
 		$pdf->SetFont('','B',$defaultFontSize + 2);
 		$pdf->SetXY($this->marge_gauche, $this->marge_haute + ($this->line_height/2));
 		$pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche, 2, $this->title, 0, 'C');
 
 		// Columns
-		$pdf->SetFont('', '', $defaultFontSize);		
+		$pdf->SetFont('', '', $defaultFontSize);
 		$pdf->SetXY($this->posxLeft, $this->tabTop);
 		$pdf->Cell($this->posxDateDue - $this->posxLeft, 2, $outputLangs->transnoentities("BillsCustomersUnpaid"), 0, 0, 'L', false, '', 1);
-		
+
 		$pdf->line($this->posxDateDue, $this->tabTop, $this->posxDateDue, $this->tabTop + $this->tab_height + $this->line_height - 1);
 		$pdf->SetXY($this->posxDateDue, $this->tabTop);
 		$pdf->Cell($this->posxInvoiceAmountTTC - $this->posxDateDue, 2, $outputLangs->transnoentities("DateDue"), 0, 0, 'C', false, '', 1);
@@ -305,11 +334,11 @@ class pdf_standard
 		$pdf->line($this->posxInvoiceAmountTTC, $this->tabTop, $this->posxInvoiceAmountTTC, $this->tabTop + $this->tab_height + $this->line_height - 1);
 		$pdf->SetXY($this->posxInvoiceAmountTTC, $this->tabTop);
 		$pdf->Cell($this->posxReceived - $this->posxInvoiceAmountTTC, 2, $outputLangs->transnoentities("AmountTTC"), 0, 0, 'C', false, '', 1);
-		
+
 		$pdf->line($this->posxReceived, $this->tabTop, $this->posxReceived, $this->tabTop + $this->tab_height + $this->line_height - 1);
 		$pdf->SetXY($this->posxReceived, $this->tabTop);
 		$pdf->Cell($this->page_largeur - $this->marge_droite - $this->posxReceived, 2, $outputLangs->transnoentities("Received"), 0, 0, 'C', false, '', 1);
-		
+
 		$pdf->line($this->marge_gauche, $this->tabTop + $this->line_height, $this->page_largeur - $this->marge_droite, $this->tabTop + $this->line_height);
 
 		$pdf->Rect($this->marge_gauche, $this->tabTop, $this->page_largeur - $this->marge_gauche - $this->marge_droite, $this->tab_height + $this->line_height - 1);
@@ -340,9 +369,10 @@ class pdf_standard
 		for ($i = 0 ; $i < $numLines ; $i++)
 		{
 			$obj = $lines[$i];
-			
+
 			if ($yp > $this->tab_height - ($this->line_height))
 			{
+				$this->_pagefoot($pdf, $this->reportObject, $outputLangs, 1);
 				$pdf->AddPage();
 				$page++;
 				$this->_pagehead($pdf, $page, $outputLangs);
@@ -350,16 +380,16 @@ class pdf_standard
 				$yp = 0;
 				$fill = false;
 			}
-		
+
 			// Invoice number
 			$pdf->SetXY($this->posxLeft, $this->tabTop + $this->line_height + $yp);
 			$pdf->Cell($this->posxLate - $this->posxLeft, $this->line_height, $obj->facnumber, 0, 0, 'L', $fill, '', 1);
-			
+
 			if ($obj->hasDelay() && !empty($this->warning_image_path)) {
 				$numDelays++;
 				$pdf->Image($this->warning_image_path, $this->posxLate, $this->tabTop + $this->line_height + $yp + 1, 3, 3);
 			}
-			
+
 			$pdf->SetXY($this->posxCompany, $this->tabTop + $this->line_height + $yp);
 			$pdf->Cell($this->posxDateDue - $this->posxCompany, $this->line_height, $obj->name, 0, 0, 'L', $fill);
 
@@ -374,27 +404,27 @@ class pdf_standard
 			// Received
 			$pdf->SetXY($this->posxReceived, $this->tabTop + $this->line_height + $yp);
 			$pdf->Cell($this->page_largeur - $this->marge_droite - $this->posxReceived, $this->line_height, price($obj->am), 0, 0, 'R', $fill, '', 1);
-			
+
 			$total_ttc +=  $obj->total_ttc;
 			$total_ht += $obj->total_ht;
 			$total_amount +=  $obj->am;
 
 			$yp = $yp + $this->line_height;
 		}
-		
-		$pdf->SetXY($this->posxLeft, $this->page_hauteur - $this->marge_basse - ($this->line_height*2) - 1);
-		$pdf->MultiCell($this->posxDateDue - $this->posxLeft, $this->line_height, $langs->transnoentities("RemainderToTakeAtDateOf", dol_print_date($this->customersOwedDate, "%d/%m/%Y"), price($total_ttc - $total_amount)), 0, 'L', false, 1, '', '', true, 0, true);
-				
-		$pdf->SetXY($this->posxInvoiceAmountTTC, $this->page_hauteur - $this->marge_basse - ($this->line_height*2) - 1);
+
+		$pdf->SetXY($this->posxLeft, $this->page_hauteur - $this->heightforfooter - ($this->line_height*2) - 1);
+		$pdf->MultiCell($this->posxDateDue - $this->posxLeft, $this->line_height, $langs->transnoentities("RemainderToTakeAtDateOf", dol_print_date($this->customersOwedDate, "day"), price($total_ttc - $total_amount)), 0, 'L', false, 1, '', '', true, 0, true);
+
+		$pdf->SetXY($this->posxInvoiceAmountTTC, $this->page_hauteur - $this->heightforfooter - ($this->line_height*2) - 1);
 		$pdf->Cell($this->posxReceived - $this->posxInvoiceAmountTTC, $this->line_height, price($total_ttc), 0, 0, 'R', false, '', 1);
-		
-		$pdf->SetXY($this->posxReceived, $this->page_hauteur - $this->marge_basse - ($this->line_height*2) - 1);
+
+		$pdf->SetXY($this->posxReceived, $this->page_hauteur - $this->heightforfooter - ($this->line_height*2) - 1);
 		$pdf->Cell($this->page_largeur - $this->marge_droite - $this->posxReceived, $this->line_height, price($total_amount), 0, 0, 'R', false, '', 1);
-		
+
 		if ($numDelays > 0 && !empty($this->warning_image_path)) {
 			$numDays = abs($conf->facture->client->warning_delay)/60/60/24;
-			$pdf->Image($this->warning_image_path, $this->posxLeft, $this->page_hauteur - $this->marge_basse - $this->line_height + 0.5, 3, 3);
-			$pdf->SetXY($this->posxLeft + 3, $this->page_hauteur - $this->marge_basse - $this->line_height);
+			$pdf->Image($this->warning_image_path, $this->posxLeft, $this->page_hauteur - $this->heightforfooter - $this->line_height + 0.5, 3, 3);
+			$pdf->SetXY($this->posxLeft + 3, $this->page_hauteur - $this->heightforfooter - $this->line_height);
 			$pdf->MultiCell($this->posxDateDue - $this->posxLate, $this->line_height, "= ".$langs->transnoentities('WarningDelay', $numDays), 0, 'L', 0);
 		}
 

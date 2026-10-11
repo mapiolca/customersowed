@@ -41,6 +41,8 @@ function customersowedAdminPrepareHead()
 	$head[$h][1] = $langs->trans("Settings");
 	$head[$h][2] = 'settings';
 	$h ++;
+	$head[$h++] = array(dol_buildpath('/customersowed/admin/compatibility.php', 1), $langs->trans('Compatibility'), 'compatibility');
+	$object = new stdClass();
 	if (intval(DOL_VERSION) > 7) {
 		$head[$h][0] = dol_buildpath("/customersowed/admin/about.php", 1);
 		$head[$h][1] = $langs->trans("About");

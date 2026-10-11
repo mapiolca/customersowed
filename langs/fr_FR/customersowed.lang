@@ -147,7 +147,6 @@ ErrorFolderNotExists = Le dossier des PDF n'existe pas. Veuillez désactiver/ré
 CustomersOwedUnableToGetFirstAdminUser = Impossible d'obtenir le premier utilisateur administrateur
 CustomersOwedMailSendTo = Un mail a été envoyé à '%s' (%s).
 CustomersOwedMailsSend = %s mails ont été envoyés.
-CustomersOwedMailsSend = %s mail a été envoyé.
 
 #
 # SPECIMEN
@@ -193,3 +192,19 @@ CustomersOwed180days = 90 - 180 jours
 CustomersOwedMore180days = > 180 jours
 
 CustomersOwedTimetableAtDateOf = Echéancier restant dû par les clients au %s
+
+# Version 2.0 compatibility and access checks
+CustomersOwedDirectoryUnavailable=Le répertoire documentaire de cet environnement est indisponible.
+CustomersOwedCronBusy=Un envoi est déjà en cours pour cet environnement.
+CustomersOwedMailUncertain=Un envoi précédent a un résultat incertain. Vérifiez sa réception avant toute reprise manuelle.
+CustomersOwedFooterTooLarge=Le pied de page laisse trop peu de place au tableau. Réduisez le texte libre du pied de page.
+CustomersOwedEnvironment=Environnement
+CustomersOwedMinimumDolibarr=Version minimale de Dolibarr
+CustomersOwedMinimumPhp=Version minimale de PHP
+CustomersOwedReportCapability=Rapport des créances clients
+CustomersOwedSharedCapability=Factures partagées entre environnements
+CustomersOwedCronCapability=Envois périodiques
+CustomersOwedReportRequirements=Dolibarr 20+, PHP 8.0+ et module Factures requis.
+CustomersOwedSharedRequirements=Module Multicompany requis ; les partages natifs des factures et des tiers sont respectés.
+CustomersOwedCronRequirements=Modules Factures et Travaux planifiés requis, avec les droits de l’utilisateur d’exécution.
+CustomersOwedCompatibilityNotTested=Les versions minimales sont déclarées. Les essais sur votre instance Dolibarr et Multicompany restent nécessaires.

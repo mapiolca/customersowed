@@ -94,8 +94,8 @@ class box_customersowed extends ModeleBoxes
 
 		$this->param = $param;
 
-		//$this->enabled = $conf->global->FEATURES_LEVEL > 0;		 // Condition when module is enabled or not
-		$this->hidden = ! ($user->rights->customersowed->read);   // Condition when module is visible by user (test on permission)
+		//$this->enabled = getDolGlobalString('FEATURES_LEVEL') > 0;		 // Condition when module is enabled or not
+		$this->hidden = ! ($user->hasRight('customersowed', 'read'));   // Condition when module is visible by user (test on permission)
 	}
 
 	/**
@@ -105,28 +105,20 @@ class box_customersowed extends ModeleBoxes
 	 */
 	public function loadBox()
 	{
-		global $langs, $conf, $db;		
+		global $langs, $conf, $db;
 		$langs->load("boxes");
 
-		$customers_owed_report_path = dol_buildpath('/custom/customersowed/class/customersowed.class.php');
-
-		if (file_exists($customers_owed_report_path)) {
-			$customers_owed_report_url = DOL_URL_ROOT.'/custom/customersowed/view/customers_owed_report.php';
-			include_once $customers_owed_report_path;			
+		global $user;
+		if (!isModEnabled('customersowed') || !$user->hasRight('customersowed', 'read')) {
+			return;
 		}
-		else {
-			$customers_owed_report_path = dol_buildpath('/customersowed/class/customersowed.class.php');
-			if (file_exists($customers_owed_report_path)) {
-				$customers_owed_report_url = DOL_URL_ROOT.'/customersowed/view/customers_owed_report.php';
-				include_once $customers_owed_report_path;
-			}
-		}
-		
-		$customersOwedDate = dol_now(); 
+		dol_include_once('/customersowed/class/customersowed.class.php');
+		$customers_owed_report_url = dol_buildpath('/customersowed/view/customers_owed_report.php', 1);
+		$customersOwedDate = dol_now();
 		$customersOwedReport = new CustomersOwed($db, $customersOwedDate, true);
-		$customersOwedReport->fetch_lines();
+		if ($customersOwedReport->fetch_lines() < 0) { return; }
 		$totalCustomersOwed = $customersOwedReport->getTotalCustomersOwed();
-		
+
 		// Populate the head at runtime
 		$this->info_box_head = array(
 			// Title text
@@ -144,12 +136,12 @@ class box_customersowed extends ModeleBoxes
 			// Limit and truncate with "…" the displayed text lenght, 0 = disabled
 			'limit' => 0,
 			// Adds translated " (Graph)" to a hidden form value's input (?)
-			'graph' => false,			
+			'graph' => false,
 		);
 
 		// Populate the contents at runtime
-		//$text = $langs->trans("RemainderToTakeAtDateOf", dol_print_date($customersOwedDate, "%d/%m/%Y"), price($totalCustomersOwed)); //CustomersOwedBoxDescription					
-		$this->info_box_contents[0][0] = array( 
+		//$text = $langs->trans("RemainderToTakeAtDateOf", dol_print_date($customersOwedDate, "%d/%m/%Y"), price($totalCustomersOwed)); //CustomersOwedBoxDescription
+		$this->info_box_contents[0][0] = array(
 			'tr' => '',
 			'td' => 'class="liste_total left"',
 			'text' => '<a href="'.$customers_owed_report_url.'">'.$langs->trans("BillsCustomersUnpaidAtDateOf", dol_print_date($customersOwedDate, "%d/%m/%Y")).'</a>',

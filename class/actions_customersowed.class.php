@@ -27,7 +27,7 @@
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
-require_once dol_buildpath('/customersowed/class/customersowed.class.php');
+require_once __DIR__.'/customersowed.class.php';
 
 /**
  * Class ActionsCustomersOwed
@@ -70,6 +70,9 @@ class ActionsCustomersOwed
 	public $filename;
 
 	public $fileNameToSend;
+	public $output = '';
+	public $result = '';
+	public $lastresult = 0;
 
 	/**
 	 * Constructor
@@ -88,9 +91,9 @@ class ActionsCustomersOwed
 		/*
 		 * $newlang = '';
 		 * $lang_id = GETPOST('lang_id');
-		 * if ($conf->global->MAIN_MULTILANGS && empty($newlang) && ! empty($lang_id))
+		 * if (getDolGlobalString('MAIN_MULTILANGS') && empty($newlang) && ! empty($lang_id))
 		 * $newlang = $lang_id;
-		 * if ($conf->global->MAIN_MULTILANGS && empty($newlang))
+		 * if (getDolGlobalString('MAIN_MULTILANGS') && empty($newlang))
 		 * $newlang = $mysoc->default_lang;
 		 * if (! empty($newlang)) {
 		 * $outputlangs->setDefaultLang($newlang);
@@ -118,224 +121,34 @@ class ActionsCustomersOwed
 	}
 
 	/**
-	 * Execute action
-	 *
-	 * @param array $parameters
-	 *        	Array of parameters
-	 * @param CommonObject $object
-	 *        	The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
-	 * @param string $action
-	 *        	'add', 'update', 'view'
-	 * @return int <0 if KO,
-	 *         =0 if OK but we want to process standard actions too,
-	 *         >0 if OK and we want to replace standard actions.
-	 */
-	function getNomUrl($parameters, &$object, &$action)
-	{
-		// global $langs, $conf, $user;
-		$this->resprints = '';
-		return 0;
-	}
-
-	/**
-	 * Overloading the doActions function : replacing the parent's function with the one below
-	 *
-	 * @param array $parameters
-	 *        	Hook metadatas (context, etc...)
-	 * @param CommonObject $object
-	 *        	The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
-	 * @param string $action
-	 *        	Current action (if set). Generally create or edit or null
-	 * @param HookManager $hookmanager
-	 *        	Hook manager propagated to allow calling another hook
-	 * @return int < 0 on error, 0 on success, 1 to replace standard code
-	 */
-	public function doActions($parameters, &$object, &$action, $hookmanager)
-	{
-		global $conf, $user, $langs;
-
-		$error = 0; // Error counter
-
-		/* print_r($parameters); print_r($object); echo "action: " . $action; */
-		if (in_array($parameters['currentcontext'], array(
-			'somecontext1',
-			'somecontext2'))) // do something only for the context 'somecontext1' or 'somecontext2'
-		{
-			// Do what you want here...
-			// You can for example call global vars like $fieldstosearchall to overwrite them, or update database depending on $action and $_POST values.
-		}
-
-		if (! $error) {
-			$this->results = array(
-				'myreturn' => 999);
-			$this->resprints = 'A text to show';
-			return 0; // or return 1 to replace standard code
-		} else {
-			$this->errors[] = 'Error message';
-			return - 1;
-		}
-	}
-
-	/**
-	 * Overloading the doActions function : replacing the parent's function with the one below
-	 *
-	 * @param array $parameters
-	 *        	Hook metadatas (context, etc...)
-	 * @param CommonObject $object
-	 *        	The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
-	 * @param string $action
-	 *        	Current action (if set). Generally create or edit or null
-	 * @param HookManager $hookmanager
-	 *        	Hook manager propagated to allow calling another hook
-	 * @return int < 0 on error, 0 on success, 1 to replace standard code
-	 */
-	public function doMassActions($parameters, &$object, &$action, $hookmanager)
-	{
-		global $conf, $user, $langs;
-
-		$error = 0; // Error counter
-
-		/* print_r($parameters); print_r($object); echo "action: " . $action; */
-		if (in_array($parameters['currentcontext'], array(
-			'somecontext1',
-			'somecontext2'))) // do something only for the context 'somecontext1' or 'somecontext2'
-		{
-			foreach ($parameters['toselect'] as $objectid) {
-				// Do action on each object id
-			}
-		}
-
-		if (! $error) {
-			$this->results = array(
-				'myreturn' => 999);
-			$this->resprints = 'A text to show';
-			return 0; // or return 1 to replace standard code
-		} else {
-			$this->errors[] = 'Error message';
-			return - 1;
-		}
-	}
-
-	/**
-	 * Overloading the addMoreMassActions function : replacing the parent's function with the one below
-	 *
-	 * @param array $parameters
-	 *        	Hook metadatas (context, etc...)
-	 * @param CommonObject $object
-	 *        	The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
-	 * @param string $action
-	 *        	Current action (if set). Generally create or edit or null
-	 * @param HookManager $hookmanager
-	 *        	Hook manager propagated to allow calling another hook
-	 * @return int < 0 on error, 0 on success, 1 to replace standard code
-	 */
-	public function addMoreMassActions($parameters, &$object, &$action, $hookmanager)
-	{
-		global $conf, $user, $langs;
-
-		$error = 0; // Error counter
-
-		/* print_r($parameters); print_r($object); echo "action: " . $action; */
-		if (in_array($parameters['currentcontext'], array(
-			'somecontext1',
-			'somecontext2'))) // do something only for the context 'somecontext1' or 'somecontext2'
-		{
-			$this->resprints = '<option value="0"' . ($disabled ? ' disabled="disabled"' : '') . '>' . $langs->trans("CustomersOwedMassAction") . '</option>';
-		}
-
-		if (! $error) {
-			return 0; // or return 1 to replace standard code
-		} else {
-			$this->errors[] = 'Error message';
-			return - 1;
-		}
-	}
-
-	/**
-	 * Execute action
-	 *
-	 * @param array $parameters
-	 *        	Array of parameters
-	 * @param Object $object
-	 *        	Object output on PDF
-	 * @param string $action
-	 *        	'add', 'update', 'view'
-	 * @return int <0 if KO,
-	 *         =0 if OK but we want to process standard actions too,
-	 *         >0 if OK and we want to replace standard actions.
-	 */
-	function beforePDFCreation($parameters, &$object, &$action)
-	{
-		global $conf, $user, $langs;
-		global $hookmanager;
-
-		$outputlangs = $langs;
-
-		$ret = 0;
-		$deltemp = array();
-		dol_syslog(get_class($this) . '::executeHooks action=' . $action);
-
-		/* print_r($parameters); print_r($object); echo "action: " . $action; */
-		if (in_array($parameters['currentcontext'], array(
-			'somecontext1',
-			'somecontext2'))) // do something only for the context 'somecontext1' or 'somecontext2'
-		{
-		}
-
-		return $ret;
-	}
-
-	/**
-	 * Execute action
-	 *
-	 * @param array $parameters
-	 *        	Array of parameters
-	 * @param Object $pdfhandler
-	 *        	PDF builder handler
-	 * @param string $action
-	 *        	'add', 'update', 'view'
-	 * @return int <0 if KO,
-	 *         =0 if OK but we want to process standard actions too,
-	 *         >0 if OK and we want to replace standard actions.
-	 */
-	function afterPDFCreation($parameters, &$pdfhandler, &$action)
-	{
-		global $conf, $user, $langs;
-		global $hookmanager;
-
-		$outputlangs = $langs;
-
-		$ret = 0;
-		$deltemp = array();
-		dol_syslog(get_class($this) . '::executeHooks action=' . $action);
-
-		/* print_r($parameters); print_r($object); echo "action: " . $action; */
-		if (in_array($parameters['currentcontext'], array(
-			'somecontext1',
-			'somecontext2'))) // do something only for the context 'somecontext1' or 'somecontext2'
-		{
-		}
-
-		return $ret;
-	}
-
-	/**
 	 * Generate the pdf due customer.
 	 *
 	 * @return int <0 if KO, >0 if OK
 	 */
 	function generateCustomersowedPdf($user, $customersOwedReport, $pdfreportfilesdir, $model, $sortfield = NULL, $sortorder = NULL, $socid = NULL, $exclude_dp = NULL, $only_late = NULL, $only_user = NULL, $only_salesrepresentative = NULL)
 	{
-		global $conf, $user;
+		global $conf;
 
 		$error = 0;
+		$this->error = '';
+		$this->errors = array();
 
+		if (!isModEnabled('customersowed') || !$user->hasRight('customersowed', 'write')) {
+			$this->error = 'NotEnoughPermissions';
+			return -1;
+		}
+		$expectedDirectory = $customersOwedReport->getReportDirectory($user);
+		if ($expectedDirectory === false || realpath($pdfreportfilesdir) !== realpath($expectedDirectory)
+			|| !preg_match('/^[a-z0-9_]+$/D', (string) $model)) {
+			$this->error = 'ErrorBadParameters';
+			return -1;
+		}
 		$this->filename = $customersOwedReport->pdfreportfilename;
 		$this->fileNameToSend = $pdfreportfilesdir . '/' . $this->filename;
 
 		dol_syslog(get_class($this) . "::generateCustomersowedPdf " . "Start generating PDF fileNameToSend = '" . $this->fileNameToSend . "' model = '" . $model . "' socid = '" . $socid . "' sortfield = '" . $sortfield . "' sortorder = '" . $sortorder . "' ", LOG_DEBUG);
 
-		$sav_charset_output = $outputlangs->charset_output;
+		$sav_charset_output = $this->outputlangs->charset_output;
 
 		// Search template files
 		$type = 'customersowed';
@@ -357,20 +170,25 @@ class ActionsCustomersOwed
 			require_once $modulefile;
 
 			$pdf_module = new $classname($this->db);
-			if ($pdf_module->write_file($customersOwedReport, $pdfreportfilesdir . '/' . $customersOwedReport->pdfreportfilename, $this->outputlangs, $socid, $sortfield, $sortorder) < 0) {
+			if ($pdf_module->write_file($customersOwedReport, $pdfreportfilesdir . '/' . $customersOwedReport->pdfreportfilename, $this->outputlangs, $socid, $sortfield, $sortorder) <= 0) {
 				$error ++;
-				$this->error = $this->error = "CanNotWriteFile";
+				$this->error = "CanNotWriteFile";
 				$this->errors[] = $this->error;
 				dol_syslog(get_class($this) . "::generateCustomersowedPdf " . "Error during generating PDF : Can not write file - model = '" . $model . "' socid = '" . $socid . "' sortfield = '" . $sortfield . "' sortorder = '" . $sortorder . "' ", LOG_ERR);
 			}
 		} else {
 			$error ++;
-			$this->error = $this->error = "ErrorModuleNotFound";
+			$this->error = "ErrorModuleNotFound";
 			$this->errors[] = $this->error;
 			dol_syslog(get_class($this) . "::generateCustomersowedPdf " . "Error during generating PDF : Module not found - model = '" . $model . "' socid = '" . $socid . "' sortfield = '" . $sortfield . "' sortorder = '" . $sortorder . "' ", LOG_ERR);
 		}
 
-		$this->error = $this->errors[0];
+		if (!$error && $customersOwedReport->recordDocumentManifest($this->fileNameToSend) < 0) {
+			$error++;
+			$this->errors[] = $customersOwedReport->error;
+		}
+		$this->error = $this->errors[0] ?? '';
+		$this->lastresult = $error ? -1 : 1;
 
 		return $error ? - 1 : 0;
 	}
@@ -380,11 +198,30 @@ class ActionsCustomersOwed
 	 *
 	 * @return int <0 if KO, >0 if OK
 	 */
-	function sendMailWithCustomersowedPdf($user, $customersOwedReport, $pdfreportfilesdir, $model, $sortfield = NULL, $sortorder = NULL, $email_to = NULL, $socid = NULL, $exclude_dp = NULL, $only_late = NULL, $only_user = NULL, $only_salesrepresentative = NULL)
+	function sendMailWithCustomersowedPdf($user, $customersOwedReport, $pdfreportfilesdir, $model, $sortfield = NULL, $sortorder = NULL, $email_to = NULL, $socid = NULL, $exclude_dp = NULL, $only_late = NULL, $only_user = NULL, $only_salesrepresentative = NULL, $recipient = null)
 	{
 		global $conf, $mysoc;
+		$this->errors = array();
 
 		$error = 0;
+		if (is_object($recipient)) {
+			global $langs;
+			if ((int) $recipient->statut !== 1 || !in_array((int) $recipient->entity, array(0, (int) $conf->entity), true)
+				|| $recipient->email !== $email_to || !$recipient->hasRight('customersowed', 'read')) {
+				$this->error = 'NotEnoughPermissions';
+				return -1;
+			}
+			$scoped = new CustomersOwed($this->db, $customersOwedReport->customersOwedDate, $exclude_dp, $only_late, $only_user, $only_salesrepresentative);
+			$scoped->selectedEntities = $customersOwedReport->selectedEntities;
+			if ($scoped->fetch_lines($socid, $sortfield, $sortorder, $recipient) < 0) { $this->error = $scoped->error; return -1; }
+			$executorIds = array_map(static function ($line) { return (int) $line->id; }, $customersOwedReport->lines);
+			$scoped->lines = array_values(array_filter($scoped->lines, static function ($line) use ($executorIds) { return in_array((int) $line->id, $executorIds, true); }));
+			$scoped->lines_count = count($scoped->lines);
+			$scoped->totalCustomersOwed = 0;
+			foreach ($scoped->lines as $line) { $scoped->totalCustomersOwed = price2num($scoped->totalCustomersOwed + $line->total_ttc - $line->am, 'MT'); }
+			if (!$scoped->lines_count) { $this->error = 'NoRecordFound'; return -1; }
+			$customersOwedReport = $scoped;
+		}
 
 		dol_syslog(get_class($this) . "::sendMailWithCustomersowedPdf " . "Start sending mail to '" . $email_to . "'", LOG_DEBUG);
 
@@ -403,20 +240,20 @@ class ActionsCustomersOwed
 
 			// Send mail from address
 			$email_from = "";
-			if (! empty($conf->global->CUSTOMERSOWEDREPORT_PDF_EMAIL_FROM)) {
-				$email_from = $conf->global->CUSTOMERSOWEDREPORT_PDF_EMAIL_FROM;
+			if (getDolGlobalString('CUSTOMERSOWEDREPORT_PDF_EMAIL_FROM') !== '') {
+				$email_from = getDolGlobalString('CUSTOMERSOWEDREPORT_PDF_EMAIL_FROM');
 			} else {
-				if ((empty($email_from)) && ! empty($conf->global->PDF_EMAIL_FROM)) {
-					$email_from = $conf->global->PDF_EMAIL_FROM;
+				if ((empty($email_from)) && getDolGlobalString('PDF_EMAIL_FROM') !== '') {
+					$email_from = getDolGlobalString('PDF_EMAIL_FROM');
 				} else {
-					if ((empty($email_from)) && ! empty($conf->global->MAIN_INFO_SOCIETE_MAIL)) {
-						$email_from = $conf->global->MAIN_INFO_SOCIETE_MAIL;
+					if ((empty($email_from)) && getDolGlobalString('MAIN_INFO_SOCIETE_MAIL') !== '') {
+						$email_from = getDolGlobalString('MAIN_INFO_SOCIETE_MAIL');
 					} else {
-						if ((empty($email_from)) && ! empty($conf->global->MAIN_MAIL_EMAIL_FROM)) {
-							$email_from = $conf->global->MAIN_MAIL_EMAIL_FROM;
+						if ((empty($email_from)) && getDolGlobalString('MAIN_MAIL_EMAIL_FROM') !== '') {
+							$email_from = getDolGlobalString('MAIN_MAIL_EMAIL_FROM');
 						} else {
-							if ((empty($email_from)) && ! empty($conf->global->MAILING_EMAIL_FROM)) {
-								$email_from = $conf->global->MAILING_EMAIL_FROM;
+							if ((empty($email_from)) && getDolGlobalString('MAILING_EMAIL_FROM') !== '') {
+								$email_from = getDolGlobalString('MAILING_EMAIL_FROM');
 							} else {
 								if ((empty($email_from)) && ! empty($user->email)) {
 									$email_from = $user->email;
@@ -440,23 +277,23 @@ class ActionsCustomersOwed
 			}
 
 			$application = 'Dolibarr';
-			if (! empty($conf->global->MAIN_APPLICATION_TITLE))
-				$application = $conf->global->MAIN_APPLICATION_TITLE;
+			if (getDolGlobalString('MAIN_APPLICATION_TITLE') !== '')
+				$application = getDolGlobalString('MAIN_APPLICATION_TITLE');
 
 			$email_subject = "";
-			$email_body = "";			
-			$email_subject_template = $conf->global->CUSTOMERSOWEDREPORT_PDF_EMAIL_SUBJECT_TEMPLATE ? $conf->global->CUSTOMERSOWEDREPORT_PDF_EMAIL_SUBJECT_TEMPLATE : $this->outputlangs->trans('CustomersowedMessageMailSubject');
+			$email_body = "";
+			$email_subject_template = getDolGlobalString('CUSTOMERSOWEDREPORT_PDF_EMAIL_SUBJECT_TEMPLATE', $this->outputlangs->trans('CustomersowedMessageMailSubject'));
 
 			// Mail body template
 			$langs_trans_CustomersowedMessageMailBody = str_replace('<br/>', '
 			', $this->outputlangs->trans('CustomersowedMessageMailBody'));
 			$langs_trans_CustomersowedMessageMailBody = str_replace('&lt;br/>', '
 			', $langs_trans_CustomersowedMessageMailBody);
-			$email_body_template = $conf->global->CUSTOMERSOWEDREPORT_PDF_EMAIL_BODY_TEMPLATE ? $conf->global->CUSTOMERSOWEDREPORT_PDF_EMAIL_BODY_TEMPLATE : $langs_trans_CustomersowedMessageMailBody; 
+			$email_body_template = getDolGlobalString('CUSTOMERSOWEDREPORT_PDF_EMAIL_BODY_TEMPLATE', $langs_trans_CustomersowedMessageMailBody);
 
 			$CUSTOMERSOWEDREPORT_EXCLUDE_DP = "";
 			if (! isset($exclude_dp)) {
-				$CUSTOMERSOWEDREPORT_EXCLUDE_DP = $conf->global->CUSTOMERSOWEDREPORT_EXCLUDE_DP ? $this->outputlangs->trans("ExcludeDownpaymentInvoicesTooltip") : "";
+				$CUSTOMERSOWEDREPORT_EXCLUDE_DP = getDolGlobalString('CUSTOMERSOWEDREPORT_EXCLUDE_DP') ? $this->outputlangs->trans("ExcludeDownpaymentInvoicesTooltip") : "";
 			} else {
 				if ($exclude_dp > 0) {
 					$CUSTOMERSOWEDREPORT_EXCLUDE_DP = $this->outputlangs->trans("ExcludeDownpaymentInvoicesTooltip");
@@ -465,7 +302,7 @@ class ActionsCustomersOwed
 
 			$CUSTOMERSOWEDREPORT_ONLY_LATE = "";
 			if (! isset($only_late)) {
-				$CUSTOMERSOWEDREPORT_ONLY_LATE = $conf->global->CUSTOMERSOWEDREPORT_ONLY_LATE ? $this->outputlangs->trans("OnlyLatePaymentInvoicesTooltip") : "";
+				$CUSTOMERSOWEDREPORT_ONLY_LATE = getDolGlobalString('CUSTOMERSOWEDREPORT_ONLY_LATE') ? $this->outputlangs->trans("OnlyLatePaymentInvoicesTooltip") : "";
 			} else {
 				if ($only_late > 0) {
 					$CUSTOMERSOWEDREPORT_ONLY_LATE = $this->outputlangs->trans("OnlyLatePaymentInvoicesTooltip");
@@ -474,7 +311,7 @@ class ActionsCustomersOwed
 
 			$CUSTOMERSOWEDREPORT_ONLY_CREATED_BY = ""; // $this->outputlangs->trans("Everybody");
 			if (! isset($only_user)) {
-				if ($conf->global->CUSTOMERSOWEDREPORT_ONLY_CREATED_BY) {
+				if (getDolGlobalString('CUSTOMERSOWEDREPORT_ONLY_CREATED_BY')) {
 					$CUSTOMERSOWEDREPORT_ONLY_CREATED_BY = $this->outputlangs->trans("OnlyInvoicesCreatedBy") . " : " . $user->firstname . " " . $user->lastname;
 				}
 			} else {
@@ -487,7 +324,7 @@ class ActionsCustomersOwed
 
 			$CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE = "";
 			if (! isset($only_salesrepresentative)) {
-				if ($conf->global->CUSTOMERSOWEDREPORT_ONLY_CREATED_BY) {
+				if (getDolGlobalString('CUSTOMERSOWEDREPORT_ONLY_CREATED_BY')) {
 					$CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE = $this->outputlangs->trans("OnlyInvoicesWhoseSalesRepresentativeIs") . " : " . $user->firstname . " " . $user->lastname;
 				}
 			} else {
@@ -532,9 +369,10 @@ class ActionsCustomersOwed
 
 			$DOL_MAIN_URL_ROOT = "";
 			$CUSTOMERSOWEDREPORT_URL = "";
-			if (($socid < 1) && ($conf->global->CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URL > 0)) {
+			$DOL_MAIN_URL_ROOT = DOL_MAIN_URL_ROOT;
+			if (($socid < 1) && (getDolGlobalString('CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URL') > 0)) {
 				$DOL_MAIN_URL_ROOT = DOL_MAIN_URL_ROOT;
-				$CUSTOMERSOWEDREPORT_URL = DOL_MAIN_URL_ROOT . '/custom/customersowed/view/customers_owed_report.php';
+				$CUSTOMERSOWEDREPORT_URL = dol_buildpath('/customersowed/view/customers_owed_report.php', 2);
 			}
 			$substitutionarray = array_merge($substitutionarray, array(
 				'__DOL_MAIN_URL_ROOT__' => $DOL_MAIN_URL_ROOT,
@@ -583,11 +421,6 @@ class ActionsCustomersOwed
 						$totalpay = $obj->am;
 
 						$remaintopay = $facturestatic->total_ttc - $totalpay;
-						if ($facturestatic->type == Facture::TYPE_CREDIT_NOTE && $obj->paye == 1) {
-							$remaincreditnote = $discount->getAvailableDiscounts($obj->fk_soc, '', 'rc.fk_facture_source=' . $facturestatic->id);
-							$remaintopay = - $remaincreditnote;
-							$totalpay = $facturestatic->total_ttc - $remaintopay;
-						}
 
 						if ($i % 2 == 1) {
 							$listTable .= '<tr style="background: #EEE;">';
@@ -595,17 +428,17 @@ class ActionsCustomersOwed
 							$listTable .= '<tr style="background: #FFF;">';
 						}
 						$listTable .= '<td style="border-style: solid; border-width: thin;" width="110">';
-						if (($socid < 1) && ($conf->global->CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URL > 0)) {
+						if (($socid < 1) && (getDolGlobalString('CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URL') > 0)) {
 							$listTable .= '<a href="' . DOL_MAIN_URL_ROOT . '/compta/facture/card.php?facid=' . $facturestatic->id . '">' . $facturestatic->ref . '</a>';
 						} else {
 							$listTable .= $facturestatic->ref;
 						}
 						$listTable .= '</td>';
 						$listTable .= '<td style="border-style: solid; border-width: thin;" align="left">';
-						if (($socid < 1) && ($conf->global->CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URL > 0)) {
-							$listTable .= '<a href="' . DOL_MAIN_URL_ROOT . '/comm/card.php?socid=' . $societestatic->id . '">' . $societestatic->name . '</a>';
+						if (($socid < 1) && (getDolGlobalString('CUSTOMERSOWEDREPORT_MAIL_CONTAINS_URL') > 0)) {
+							$listTable .= '<a href="' . DOL_MAIN_URL_ROOT . '/societe/card.php?socid=' . (int) $societestatic->id . '">' . dol_escape_htmltag($societestatic->name) . '</a>';
 						} else {
-							$listTable .= $societestatic->name;
+							$listTable .= dol_escape_htmltag($societestatic->name);
 						}
 						$listTable .= '</td>';
 
@@ -667,166 +500,136 @@ class ActionsCustomersOwed
 			}
 		}
 
-		$this->error = $this->errors[0];
+		$this->error = $this->errors[0] ?? '';
 
 		return $error ? - 1 : 0;
 	}
 
 	/**
-	 * Send all the mails with the pdf due customer.
-	 *
-	 * @return int <0 if KO, >0 if OK
+	 * Run the native scheduled job under its configured user and entity.
+	 * Each recipient receives the intersection of their own scope and the executor's.
+	 * A daily pending marker prevents replay after an uncertain SMTP outcome.
+	 * @return int 0 on success, -1 on error
 	 */
-	function sendMails()
+	public function sendMails()
+	{
+		global $conf, $user;
+		$this->output = '';
+		$this->error = '';
+		if (!CustomersOwedCompatibility::getFeatures()['CustomersOwedCronCapability']['available'] || !isModEnabled('customersowed')
+			|| !$user->hasRight('customersowed', 'write')) {
+			$this->error = 'NotEnoughPermissions';
+			return -1;
+		}
+		$report = new CustomersOwed($this->db, dol_now(),
+			getDolGlobalInt('CUSTOMERSOWEDREPORT_EXCLUDE_DP'), getDolGlobalInt('CUSTOMERSOWEDREPORT_ONLY_LATE'));
+		if ($report->fetch_lines() < 0 || ($directory = $report->getReportDirectory($user)) === false) {
+			$this->error = $report->error;
+			return -1;
+		}
+		$metadata = dirname($directory).'/.cron';
+		if (is_link($metadata) || dol_mkdir($metadata) < 0 || is_link($metadata.'/cron.lock')) {
+			$this->error = 'CustomersOwedDirectoryUnavailable';
+			return -1;
+		}
+		$lock = fopen($metadata.'/cron.lock', 'c');
+		if ($lock === false || !flock($lock, LOCK_EX | LOCK_NB)) {
+			if (is_resource($lock)) { fclose($lock); }
+			$this->error = 'CustomersOwedCronBusy';
+			return -1;
+		}
+		try {
+			$recipientIds = array((int) $user->id);
+			if (getDolGlobalInt('CUSTOMERSOWEDREPORT_ONLY_CREATED_BY') || getDolGlobalInt('CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE')) {
+				$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX.'user WHERE statut = 1 AND entity IN (0, '.((int) $conf->entity).')';
+				$resql = $this->db->query($sql);
+				if (!$resql) { $this->error = $this->db->lasterror(); return -1; }
+				while (is_object($row = $this->db->fetch_object($resql))) { $recipientIds[] = (int) $row->rowid; }
+				$this->db->free($resql);
+			}
+			$allowedIds = array_map(static function ($line) { return (int) $line->id; }, $report->lines);
+			$sent = 0;
+			foreach (array_unique($recipientIds) as $id) {
+				$recipient = new User($this->db);
+				if ($recipient->fetch($id) <= 0) { $this->error = 'ErrorRecordNotFound'; return -1; }
+				$recipient->getrights();
+				if ((int) $recipient->statut !== 1 || !in_array((int) $recipient->entity, array(0, (int) $conf->entity), true)
+					|| !$recipient->hasRight('customersowed', 'read') || empty($recipient->email)) { continue; }
+				$variants = $id === (int) $user->id ? array(array(0, 0)) : array();
+				if (getDolGlobalInt('CUSTOMERSOWEDREPORT_ONLY_CREATED_BY')) { $variants[] = array($id, 0); }
+				if (getDolGlobalInt('CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE')) { $variants[] = array(0, $id); }
+				foreach ($variants as $variant) {
+					$scoped = new CustomersOwed($this->db, $report->customersOwedDate, $report->excludeDpInvoices,
+						$report->onlyLatePaymentInvoices, $variant[0], $variant[1]);
+					if ($scoped->fetch_lines(null, null, null, $recipient) < 0) { $this->error = $scoped->error; return -1; }
+					$scoped->lines = array_values(array_filter($scoped->lines,
+						static function ($line) use ($allowedIds) { return in_array((int) $line->id, $allowedIds, true); }));
+					$scoped->lines_count = count($scoped->lines);
+					$scoped->totalCustomersOwed = 0;
+					foreach ($scoped->lines as $line) { $scoped->totalCustomersOwed = price2num($scoped->totalCustomersOwed + $line->total_ttc - $line->am, 'MT'); }
+					if (!$scoped->lines_count) { continue; }
+					$key = hash('sha256', dol_print_date(dol_now(), '%Y-%m-%d').'|'.$id.'|'.implode(',', $variant));
+					$marker = $metadata.'/mail-'.$key.'.json';
+					if (file_exists($marker) || is_link($marker)) {
+						$state = json_decode((string) file_get_contents($marker), true);
+						if (!is_array($state) || ($state['state'] ?? '') !== 'sent') {
+							$this->error = 'CustomersOwedMailUncertain'; return -1;
+						}
+						continue;
+					}
+					if (file_put_contents($marker, '{"state":"pending"}', LOCK_EX) === false) {
+						$this->error = 'CustomersOwedDirectoryUnavailable'; return -1;
+					}
+					if ($this->sendMailWithCustomersowedPdf($user, $scoped, $directory,
+						getDolGlobalString('CUSTOMERSOWEDREPORT_ADDON_PDF'), null, null, $recipient->email,
+						null, $scoped->excludeDpInvoices, $scoped->onlyLatePaymentInvoices, $variant[0], $variant[1]) < 0) { return -1; }
+					if (file_put_contents($marker, '{"state":"sent"}', LOCK_EX) === false) {
+						$this->error = 'CustomersOwedMailUncertain'; return -1;
+					}
+					$sent++;
+				}
+			}
+			$this->output = $this->outputlangs->trans('CustomersOwedMailsSend', $sent);
+			return 0;
+		} finally {
+			flock($lock, LOCK_UN);
+			fclose($lock);
+		}
+	}
+
+	/** Native fileslib security hook; legacy unscoped reports are deliberately refused.
+	 * @param array<string,mixed> $parameters Native document parameters
+	 * @param CommonObject $object Native hook object
+	 * @param string $action Current action
+	 * @param HookManager $hookmanager Native hook manager
+	 * @return int 0: continue native processing
+	 */
+	public function checkSecureAccess($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf;
-
-		$error = 0;
-		$this->output = "";
-		$mails_sended_count = 0;
-
-		dol_syslog(get_class($this) . "::sendMails " . "Start sending mail to '" . $email_to . "'", LOG_DEBUG);
-
-		// 1) get first admin user
-		$sql = 'SELECT login, entity from ' . MAIN_DB_PREFIX . 'user WHERE admin = 1 and statut = 1 ORDER BY entity LIMIT 1';
-		$resql = $this->db->query($sql);
-		if ($resql) {
-			$obj = $this->db->fetch_object($resql);
-			if ($obj) {
-				$userlogin = $obj->login;
-				dol_syslog(get_class($this) . "::sendMails First admin user login found : '" . $userlogin . "', entity " . $obj->entity, LOG_DEBUG);
-			}
-		} else {
-			$error ++;
-			$this->errors[] = $this->outputlangs->transnoentities("CustomersOwedUnableToGetFirstAdminUser");
+		if (($parameters['modulepart'] ?? '') !== 'customersowed') { return 0; }
+		$actor = $parameters['fuser'] ?? null;
+		if (!is_object($actor) || !isModEnabled('customersowed')
+			|| !$actor->hasRight('customersowed', 'read') || (int) ($parameters['entity'] ?? 0) !== (int) $conf->entity) {
+			accessforbidden();
 		}
-
-		if ($error < 1) {
-			// Check user login
-			$user = new User($this->db);
-			$result = $user->fetch('', $userlogin);
-			if ($result < 0) {
-				$error ++;
-				$this->errors[] = "User Error: " . $user->error;
-				dol_syslog(get_class($this) . "::sendMails User Error:" . $user->error, LOG_ERR);
-			} else {
-				if (empty($user->id)) {
-					$error ++;
-					$this->errors[] = "User login: " . $userlogin . " does not exists";
-					dol_syslog(get_class($this) . "::sendMails User login:" . $userlogin . " does not exists", LOG_ERR);
-				}
-			}
-			$user->getrights();
-			dol_syslog(get_class($this) . "::sendMails The user login used to send mail is : '" . $userlogin . "'", LOG_ERR);
-		}
-
-		if ($error < 1) {
-			// 2) Create $customersOwed instances
-			$customersOwedDate = dol_now();
-			$pdfreportfilesdir = $conf->customersowed->dir_output;
-			$model = $conf->global->CUSTOMERSOWEDREPORT_ADDON_PDF;
-			$exclude_dp = $conf->global->CUSTOMERSOWEDREPORT_EXCLUDE_DP;
-			$only_late = $conf->global->CUSTOMERSOWEDREPORT_ONLY_LATE;
-
-			// 3) Load customers owed invoices
-			$socid = 0;
-			$sortfield = 'f.date_lim_reglement';
-			$sortorder = 'ASC';
-			$this->output .= "Load customers owed invoices : ";
-			$customersOwedReport = new CustomersOwed($this->db, $customersOwedDate, $exclude_dp, $only_late);
-			$customersOwedReport->fetch_lines($socid, $sortfield, $sortorder);
-			$this->output .= $customersOwedReport->lines_count . " \n";
-
-			// 4) Send mail to first admin user, with PDF 'Customers owed'
-			$this->output .= "Send mail to first admin user, with PDF 'Customers owed', (" . $user->email . ") : ";
-			if ($customersOwedReport->lines_count > 0) {
-				$only_user = 0;
-				$only_salesrepresentative = 0;
-				$this->sendMailWithCustomersowedPdf($user, $customersOwedReport, $pdfreportfilesdir, $model, $sortfield, $sortorder, $email_to, $socid, $exclude_dp, $only_late, $only_user, $only_salesrepresentative);
-				print ".";
-				sleep(3);
-				$this->output .= "OK \n";
-				$mails_sended_count ++;
-			}
-			print ".";
-		}
-
-		if ($error < 1) {
-			if ($conf->global->CUSTOMERSOWEDREPORT_ONLY_CREATED_BY > 0) {
-				// 5) Send mail to all users, with PDF 'Customers owed'
-				$staticuser = new User($this->db);
-				$result = $staticuser->fetchAll();
-				$users_count = sizeof($staticuser->users);
-				foreach ($staticuser->users as $createdbystatic) {
-					$only_user = $createdbystatic->id;
-					$only_salesrepresentative = 0;
-					$this->output .= "Load customers owed invoices (created by '" . $createdbystatic->login . "') : ";
-					$customersOwedReport = new CustomersOwed($this->db, $customersOwedDate, $exclude_dp, $only_late, $createdbystatic->id, $only_salesrepresentative);
-					$customersOwedReport->fetch_lines($socid, $sortfield, $sortorder);
-					$this->output .= $customersOwedReport->lines_count . " \n";
-					if ($customersOwedReport->lines_count > 0) {
-						$email_to = $createdbystatic->email;
-						$this->output .= "Send mail to user '" . $createdbystatic->login . "', with PDF 'Customers owed', (" . $createdbystatic->email . ") : ";
-						if (! empty($email_to)) {
-							$this->sendMailWithCustomersowedPdf($user, $customersOwedReport, $pdfreportfilesdir, $model, $sortfield, $sortorder, $email_to, $socid, $exclude_dp, $only_late, $only_user, $only_salesrepresentative);
-							print ".";
-							sleep(3);
-							$this->output .= "OK \n";
-							$mails_sended_count ++;
-						} else {
-							$this->output .= "KO (this user does not have an email) \n";
-						}
-					}
-					print ".";
-				}
-			}
-		}
-
-		if ($error < 1) {
-			if ($conf->global->CUSTOMERSOWEDREPORT_ONLY_SALESREPRESENTATIVE > 0) {
-				// 6) Send mail to all sales representative user, with PDF 'Customers owed'
-				$staticuser = new User($this->db);
-				$result = $staticuser->fetchAll();
-				$users_count = sizeof($staticuser->users);
-				foreach ($staticuser->users as $salesrepresentativestatic) {
-					$only_user = 0;
-					$only_salesrepresentative = $salesrepresentativestatic->id;
-					$this->output .= "Load customers owed invoices (whose sales representative is '" . $salesrepresentativestatic->login . "') : ";
-					$customersOwedReport = new CustomersOwed($this->db, $customersOwedDate, $exclude_dp, $only_late, $only_user, $salesrepresentativestatic->id);
-					$customersOwedReport->fetch_lines($socid, $sortfield, $sortorder);
-					$this->output .= $customersOwedReport->lines_count . " \n";
-					if ($customersOwedReport->lines_count > 0) {
-						$email_to = $salesrepresentativestatic->email;
-						$this->output .= "Send mail to user '" . $salesrepresentativestatic->login . "', with PDF 'Customers owed', (" . $salesrepresentativestatic->email . ") : ";
-						if (! empty($email_to)) {
-							$this->sendMailWithCustomersowedPdf($user, $customersOwedReport, $pdfreportfilesdir, $model, $sortfield, $sortorder, $email_to, $socid, $exclude_dp, $only_late, $only_user, $only_salesrepresentative);
-							print ".";
-							sleep(3);
-							$this->output .= "OK \n";
-							$mails_sended_count ++;
-						} else {
-							$this->output .= "KO (this user does not have an email) \n";
-						}
-					}
-					print ".";
-				}
-			}
-		}
-
-		if ($mails_sended_count > 1) {
-			$this->output .= $this->outputlangs->transnoentities("CustomersOwedMailsSend", $mails_sended_count) . "\n";
-		} else {
-			$this->output .= $this->outputlangs->transnoentities("CustomersOwedMailSend", $mails_sended_count) . "\n";
-		}
-
-		print "\n" . $this->output;
-
-		$this->error = "";
-		if ($error > 0) {
-			$this->error = $this->errors[0];
-			print "\n" . $this->error;
-		}
-
-		return $error ? - 1 : 0;
+		$report = new CustomersOwed($this->db);
+		$directory = $report->getReportDirectory($actor);
+		$file = $parameters['original_file'] ?? '';
+		if ($directory === false || !is_string($file) || is_link($file)
+			|| realpath(dirname($file)) !== realpath($directory)
+			|| !preg_match('/^(SPECIMEN|[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-f0-9]{20})\.pdf$/D', basename($file))) { accessforbidden(); }
+		if (basename($file) === 'SPECIMEN.pdf') { return 0; }
+		$manifestPath = $directory.'/.metadata/'.basename($file).'.json';
+		if (is_link($directory.'/.metadata') || is_link($manifestPath) || !is_file($manifestPath)) { accessforbidden(); }
+		$manifest = json_decode((string) file_get_contents($manifestPath), true);
+		if (!is_array($manifest) || !isset($manifest['date'], $manifest['invoices'])
+			|| !is_int($manifest['date']) || !is_array($manifest['invoices'])) { accessforbidden(); }
+		$report->customersOwedDate = $manifest['date'];
+		if ($report->fetch_lines(null, null, null, $actor) < 0) { accessforbidden(); }
+		$accessible = array_map(static function ($line) { return (int) $line->id; }, $report->lines);
+		if (array_diff($manifest['invoices'], $accessible)) { accessforbidden(); }
+		return 0;
 	}
+
 }

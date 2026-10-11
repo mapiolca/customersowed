@@ -90,4 +90,20 @@ To obtain a new module, made especially for you, write to: <a href="mailto:dolib
 ## Preparing v2.0.0
 
 Family: **Joliciel x Les Métiers du Bâtiment**.
-See [V2.0.0-AUDIT.md](V2.0.0-AUDIT.md) for release blockers. Full compliance and Dolibarr v20+/PHP 8.0+ compatibility remain unverified.
+Declared baseline: **Dolibarr 20+ / PHP 8.0+**. The report, widget, four PDF models and manual/scheduled emails are retained. The unused demonstration API, numbering, SQL and mailing scaffolding are removed; no business table is created or dropped.
+
+The report applies native invoice/third-party sharing and sales restrictions before SQL pagination. Multicompany lists expose an Environment filter and native badges. Payments and applied credits are aggregated separately, including consumption of source credit notes. The payment cutoff includes the selected day. Historical credit application cannot be reconstructed exactly: Dolibarr's discount record has a creation date, but no reliable timestamp for its later application. This report is not an immutable historical ledger.
+
+### Updating an existing installation
+
+- Install the new module files before disabling/re-enabling it, so the new preservation logic handles the existing settings and scheduled job. Back up the database and document directory first.
+- Reactivation migrates user/group rights `423100 → 42310001`, `423101 → 42310002`, `423102 → 42310003`. Existing grants, entity settings, custom/default models and cron frequency/status are preserved. The historical module ID `423100` is retained; no replacement ID has been allocated.
+- Generate reports again. New PDFs live in the current entity's native document directory under `private/<execution-user-id>/`. Their invoice manifest is checked against current permissions at download time. Legacy PDFs in the shared root are not moved or deleted and are no longer exposed by the module.
+- Configure the native scheduled job's execution user with module read/write, invoice and third-party read rights. Each recipient receives the intersection of their own scope and that user's scope. The job is declared disabled by default; an existing enabled job keeps its status.
+- The job locks per entity and remembers daily deliveries in `private/.cron/`. After an uncertain SMTP result it refuses automatic replay. Check delivery and logs before an administrator removes the affected `mail-<hash>.json` marker to authorize a deliberate retry. A marker is not proof of recipient delivery.
+
+### Verification
+
+Run `python -m unittest discover -s test -v` with PHP on PATH (or set `PHP_BINARY`). Seven relational tests execute SQL emitted by the production methods against an isolated SQLite fixture. The PHP harness also checks access refusals, repeated reads, directory errors, manifests, footer reservation and simulated cron replay without sending mail.
+
+PHP lint and local tests passed under PHP 8.2.11. PHPStan is not installed/configured. No real Dolibarr, MySQL/MariaDB, Multicompany, SMTP or browser deployment has been tested. See [V2.0.0-AUDIT.md](V2.0.0-AUDIT.md) for source proofs and required instance checks. This version remains in preparation; no release is published.
