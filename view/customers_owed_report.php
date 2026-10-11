@@ -597,6 +597,7 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 	print '<tr class="liste_titre">';
 	if (!empty($arrayfields['f.entity']['checked'])) { print_liste_field_titre($arrayfields['f.entity']['label'], $_SERVER['PHP_SELF'], 'f.entity', '', $param, '', $sortfield, $sortorder); }
 	print_liste_field_titre($langs->trans('InvoiceRef'), $_SERVER['PHP_SELF'], 'f.ref', '', $param, 'align="left"', $sortfield, $sortorder);
+	print_liste_field_titre($langs->trans('ThirdParty'), $_SERVER['PHP_SELF'], 's.nom', '', $param, 'align="left"', $sortfield, $sortorder);
 
 	if (!empty($arrayfields['p.ref']['checked'])) {
 		print_liste_field_titre($arrayfields['p.ref']['label'], $_SERVER["PHP_SELF"], 'p.ref', '', $param, 'align="center"', $sortfield, $sortorder);
@@ -665,7 +666,7 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 		print_liste_field_titre($arrayfields['rtp']['label'], $_SERVER['PHP_SELF'], '', '', $param, 'align="right"', $sortfield, $sortorder);
 	}
 
-	print_liste_field_titre($selectedfields, $_SERVER["PHP_SELF"], "", '', '', 'align="center"', $sortfield, $sortorder, 'maxwidthsearch ');
+	print_liste_field_titre($langs->trans('Status').$selectedfields, $_SERVER["PHP_SELF"], "", '', '', 'align="center"', $sortfield, $sortorder);
 
 	// Extra fields
 
@@ -877,37 +878,23 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 
 				// Extra fields
 
-				// Fields from hook
-				$parameters = array(
-					'arrayfields' => $arrayfields,
-					'obj' => $obj);
-				$reshook = $hookmanager->executeHooks('printFieldListValue', $parameters); // Note that $action and $object may have been modified by hook
-				print $hookmanager->resPrint;
-
 				// Amount TTC
-				print '<td align="right">' . price($obj->total_ttc) . '</td>';
+				print '<td align="right" class="nowrap">' . price($obj->total_ttc) . '</td>';
 
-				// Received
-				if (!empty($arrayfields['rtp']['checked'])) {
-
-					if ($societestatic->id == 2056) {
-
-						print '<td align="right">' . price($obj->am) . '</td>';
-
-					}else {
-
-					print '<td align="right">' . price($obj->am) . '</td>';
-
-					}
-				}
+				// Received is independent of the optional outstanding balance column.
+				print '<td align="right" class="nowrap">'.price($obj->am).'</td>';
 
 				// Rtp
 				if (!empty($arrayfields['rtp']['checked'])) {
-					print '<td align="right">' . (!empty($remaintopay) ? price($remaintopay, 0, $langs) : '&nbsp;') . '</td>'; // TODO Use a denormalized field
+					print '<td align="right" class="nowrap">' . price($remaintopay, 0, $langs) . '</td>';
 				}
 
 				// Status
-				print '<td align="center">' . $facturestatic->LibStatut($obj->paye, $obj->fk_statut, 3, $obj->am) . '</td>';
+				print '<td align="center" class="nowrap">' . $facturestatic->LibStatut($obj->paye, $obj->fk_statut, 6, $obj->am) . '</td>';
+				// Hook columns follow the same order as their headings.
+				$parameters = array('arrayfields' => $arrayfields, 'obj' => $obj);
+				$reshook = $hookmanager->executeHooks('printFieldListValue', $parameters);
+				print $hookmanager->resPrint;
 				print '</tr>';
 
 				// Totals calc
@@ -923,6 +910,8 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 			print '<tr class="liste_total">';
 			if (!empty($arrayfields['f.entity']['checked'])) { print '<td></td>'; }
 			print '<td colspan="2">'.$langs->trans('Total').' ('.$langs->trans('Page').')</td>';
+			if (!empty($arrayfields['p.ref']['checked'])) { print '<td></td>'; }
+			if (!empty($arrayfields['p.title']['checked'])) { print '<td></td>'; }
 			// Zip
 			if (!empty($arrayfields['s.zip']['checked'])) {
 				print '<td></td>';
@@ -995,8 +984,9 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 			print '<td align="right">' . price($total_ttc) . '</td>';
 			print '<td align="right">' . price($total_amount) . '</td>';
 			if (!empty($arrayfields['rtp']['checked'])) {
-				print '<td align="right"><b>' . price($total_rtp) . '</b></td>';
+				print '<td align="right" class="nowrap"><b>' . price($total_rtp) . '</b></td>';
 			}
+			print '<td></td>';
 			print '</tr>';
 		} else {
 			$colspan = 6 + count(array_filter($arrayfields, static function ($field) { return !empty($field['checked']); }));
