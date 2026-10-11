@@ -231,9 +231,9 @@ if (!isModEnabled('customersowed')) {
 			require_once $file;
 
 			$module = new $classname($db);
-			$customersOwedReport->pdfreportfilename = 'SPECIMEN.pdf';
-			if ($module->write_file($customersOwedReport, $pdfreportfilesdir . '/' . 'SPECIMEN.pdf', $langs) > 0) {
-				header("Location: " . DOL_URL_ROOT . "/document.php?modulepart=" . $type . "&file=private/".(int) $user->id."/SPECIMEN.pdf");
+			$customersOwedReport->pdfreportfilename = 'SPECIMEN_'.$model.'.pdf';
+			if ($module->write_file($customersOwedReport, $pdfreportfilesdir.'/'.$customersOwedReport->pdfreportfilename, $langs) > 0) {
+				header('Location: '.DOL_URL_ROOT.'/document.php?modulepart='.$type.'&file=private/'.(int) $user->id.'/'.$customersOwedReport->pdfreportfilename.'&t='.dol_now());
 				return;
 			} else {
 				setEventMessages($module->error, $module->errors, 'errors');

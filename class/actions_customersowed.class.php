@@ -619,8 +619,8 @@ class ActionsCustomersOwed
 		$file = $parameters['original_file'] ?? '';
 		if ($directory === false || !is_string($file) || is_link($file)
 			|| realpath(dirname($file)) !== realpath($directory)
-			|| !preg_match('/^(SPECIMEN|[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-f0-9]{20})\.pdf$/D', basename($file))) { accessforbidden(); }
-		if (basename($file) === 'SPECIMEN.pdf') { return 0; }
+			|| !preg_match('/^(SPECIMEN(?:_(?:standard|nextep|malliaros|joliciel))?|[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-f0-9]{20})\.pdf$/D', basename($file))) { accessforbidden(); }
+		if (preg_match('/^SPECIMEN(?:_(?:standard|nextep|malliaros|joliciel))?\.pdf$/D', basename($file))) { return 0; }
 		$manifestPath = $directory.'/.metadata/'.basename($file).'.json';
 		if (is_link($directory.'/.metadata') || is_link($manifestPath) || !is_file($manifestPath)) { accessforbidden(); }
 		$manifest = json_decode((string) file_get_contents($manifestPath), true);
