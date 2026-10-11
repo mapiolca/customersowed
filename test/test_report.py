@@ -79,7 +79,7 @@ class ReportTests(unittest.TestCase):
         self.db.executescript('''
             CREATE TABLE erp_facture(rowid,entity,ref,fk_statut,type,fk_soc,ref_client,datef,
               date_lim_reglement,datec,tms,fk_mode_reglement,total_ht,total_tva,total_ttc,
-              total_localtax1,total_localtax2,fk_projet,fk_user_author);
+              localtax1,localtax2,fk_projet,fk_user_author);
             CREATE TABLE erp_societe(rowid,entity,nom,email,code_client,code_compta,phone,address,zip,town,fk_pays);
             CREATE TABLE erp_c_country(rowid,code);
             CREATE TABLE erp_c_paiement(id,code);
@@ -106,6 +106,11 @@ class ReportTests(unittest.TestCase):
         row = self.rows('restricted')[0]
         self.assertEqual((row['am'], row['ream']), (30, 12))
         self.assertEqual(row['total_ttc'] - row['am'] - row['ream'], 58)
+
+    def test_native_local_tax_columns_keep_object_field_names(self):
+        self.db.execute('UPDATE erp_facture SET localtax1=3.5, localtax2=1.25 WHERE rowid=1')
+        row = self.rows('restricted')[0]
+        self.assertEqual((row['total_localtax1'], row['total_localtax2']), (3.5, 1.25))
 
     def test_explicit_third_party_does_not_bypass_sales_scope(self):
         self.db.execute('DELETE FROM erp_societe_commerciaux WHERE fk_user=7')

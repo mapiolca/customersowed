@@ -214,9 +214,9 @@ class CustomersOwed extends CommonObject
 		}
 		$allowedSorts = array('f.rowid', 'f.ref', 'f.ref_client', 'f.type', 'f.datef',
 			'f.datec', 'f.tms', 'f.date_lim_reglement', 'f.fk_mode_reglement', 'f.total_ht',
-			'f.total_tva', 'f.total_ttc', 'f.total_localtax1', 'f.total_localtax2', 's.nom', 's.zip', 's.town', 'pr.ref', 'pr.title', 'f.entity');
+			'f.total_tva', 'f.total_ttc', 'f.localtax1', 'f.localtax2', 's.nom', 's.zip', 's.town', 'pr.ref', 'pr.title', 'f.entity');
 		$aliases = array('p.ref' => 'pr.ref', 'p.title' => 'pr.title', 'f.total' => 'f.total_ht', 'f.facnumber' => 'f.ref',
-			'f.tva' => 'f.total_tva', 'f.localtax1' => 'f.total_localtax1', 'f.localtax2' => 'f.total_localtax2');
+			'f.tva' => 'f.total_tva', 'f.total_localtax1' => 'f.localtax1', 'f.total_localtax2' => 'f.localtax2');
 		$fields = explode(',', $sortfield ?: 'f.date_lim_reglement');
 		$orders = explode(',', $sortorder ?: 'ASC');
 		$orderSql = array();
@@ -241,7 +241,7 @@ class CustomersOwed extends CommonObject
 		$entities = $selectedEntities ?: $invoiceEntities;
 		$sql = 'SELECT f.rowid, f.entity, f.ref, f.fk_statut, f.type, f.fk_soc, f.ref_client,';
 		$sql .= ' f.datef, f.date_lim_reglement as datelimite, f.datec as date_creation, f.tms as date_update, f.tms,';
-		$sql .= ' f.fk_mode_reglement, f.total_ht, f.total_tva as total_vat, f.total_ttc, f.total_localtax1, f.total_localtax2,';
+		$sql .= ' f.fk_mode_reglement, f.total_ht, f.total_tva as total_vat, f.total_ttc, f.localtax1 as total_localtax1, f.localtax2 as total_localtax2,';
 		$sql .= ' s.nom as name, s.email, s.code_client, s.code_compta, s.phone, s.address, s.zip, s.town,';
 		$sql .= ' cc.code as country_code, cp.code as mode_reglement_code,';
 		$sql .= ' pr.ref as project_ref, pr.title as project_label,';
