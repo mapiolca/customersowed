@@ -243,7 +243,7 @@ class CustomersOwed extends CommonObject
 			return -1;
 		}
 		$entities = $selectedEntities ?: $invoiceEntities;
-		$sql = 'SELECT f.rowid, f.entity, f.ref, f.fk_statut, f.type, f.fk_soc, f.ref_client,';
+		$sql = 'SELECT f.rowid, f.entity, f.ref, f.fk_statut, f.paye, f.type, f.fk_soc, f.ref_client,';
 		$sql .= ' f.datef, f.date_lim_reglement as datelimite, f.datec as date_creation, f.tms as date_update, f.tms,';
 		$sql .= ' f.fk_mode_reglement, f.total_ht, f.total_tva as total_vat, f.total_ttc, f.localtax1 as total_localtax1, f.localtax2 as total_localtax2,';
 		$sql .= ' s.nom as name, s.email, s.code_client, s.code_compta, s.phone, s.address, s.zip, s.town,';
@@ -359,7 +359,7 @@ class CustomersOwed extends CommonObject
 			$line->datec = $row->date_creation;
 			$line->date_lim_reglement = $row->datelimite;
 			$line->am = price2num($row->am + $row->ream, 'MT');
-			$line->paye = $line->total_ttc <= $line->am;
+			$line->paye = (int) $obj->paye;
 			$line->type = $row->type;
 			$line->country_code = $row->country_code;
 			$this->lines[] = $line;

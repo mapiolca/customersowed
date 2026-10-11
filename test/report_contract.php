@@ -84,7 +84,7 @@ if ($report->fetch_lines() !== -1) { throw new RuntimeException('permission bypa
 $user->allow = true; $user->socid = 1;
 if ($report->fetch_lines(2) !== -1) { throw new RuntimeException('external third party bypass'); }
 $user->socid = 0;
-$db->rows = array((object) array_fill_keys(array('entity','fk_soc','fk_statut','ref_client','name','email','code_client','code_compta','phone','address','zip','town','total_ht','total_vat','total_ttc','total_localtax1','total_localtax2','fk_mode_reglement','mode_reglement_code','project_ref','project_label','date_creation','date_update','tms','rowid','ref','datef','datelimite','am','ream','type','country_code'), 0));
+$db->rows = array((object) array_fill_keys(array('entity','fk_soc','fk_statut','paye','ref_client','name','email','code_client','code_compta','phone','address','zip','town','total_ht','total_vat','total_ttc','total_localtax1','total_localtax2','fk_mode_reglement','mode_reglement_code','project_ref','project_label','date_creation','date_update','tms','rowid','ref','datef','datelimite','am','ream','type','country_code'), 0));
 $db->rows[0]->total_ttc = 100; $db->rows[0]->am = 10; $db->rows[0]->ream = 5;
 $mailRow = clone $db->rows[0]; $mailRow->rowid = 1;
 $report->fetch_lines(); $report->fetch_lines();

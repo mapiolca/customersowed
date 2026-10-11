@@ -77,7 +77,7 @@ class ReportTests(unittest.TestCase):
         self.db = sqlite3.connect(':memory:')
         self.addCleanup(self.db.close)
         self.db.executescript('''
-            CREATE TABLE erp_facture(rowid,entity,ref,fk_statut,type,fk_soc,ref_client,datef,
+            CREATE TABLE erp_facture(rowid,entity,ref,fk_statut,paye DEFAULT 0,type,fk_soc,ref_client,datef,
               date_lim_reglement,datec,tms,fk_mode_reglement,total_ht,total_tva,total_ttc,
               localtax1,localtax2,fk_projet,fk_user_author);
             CREATE TABLE erp_societe(rowid,entity,nom,email,code_client,code_compta,phone,address,zip,town,fk_pays);
@@ -147,6 +147,7 @@ class ReportTests(unittest.TestCase):
         rows = {row['rowid']: row for row in self.rows('shared')}
         self.assertNotIn(5, rows)
         self.assertIn(6, rows)
+        self.assertEqual(rows[6]['paye'], 0)
         self.assertEqual(rows[2]['ream'], 25)
         count = self.rows('count')[0]
         self.assertEqual((count['total_rows'], count['total_owed']), (4, 263))
