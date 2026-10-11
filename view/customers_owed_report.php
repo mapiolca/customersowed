@@ -491,8 +491,10 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 	$paginationParams = '&socid='.(int) $socid.'&exclude_dp='.(int) $exclude_dp.'&only_late='.(int) $only_late
 		.'&only_user='.(int) $only_user.'&only_salesrepresentative='.(int) $only_salesrepresentative
 		.'&date_end_year='.(int) $date_end_year.'&date_end_month='.(int) $date_end_month.'&date_end_day='.(int) $date_end_day.$entityParams;
+	// Native navigation expects one extra row when another page exists.
+	$navigationRows = min($limit + 1, max(0, $customersOwedReport->total_rows - $offset));
 	print_barre_liste($title, $page, $_SERVER['PHP_SELF'], $paginationParams, $sortfield, $sortorder, '',
-		$customersOwedReport->lines_count, $customersOwedReport->total_rows, '', 0, '', '', $limit);
+		$navigationRows, $customersOwedReport->total_rows, '', 0, '', '', $limit);
 	if ($showEntities) {
 		print $form->multiselectarray('search_entities', $entityLabels, $customersOwedReport->selectedEntities, 0, 0, 'minwidth200');
 		print '<input type="submit" class="button" value="'.$langs->trans('Search').'">';
@@ -920,7 +922,7 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 
 			print '<tr class="liste_total">';
 			if (!empty($arrayfields['f.entity']['checked'])) { print '<td></td>'; }
-			print '<td colspan="2">' . $langs->trans("RemainderToTakeAtDateOf", dol_print_date($customersOwedDate, "%d/%m/%Y"), price($total_ttc - $total_amount)) . '</font> </td>';
+			print '<td colspan="2">'.$langs->trans('Total').' ('.$langs->trans('Page').')</td>';
 			// Zip
 			if (!empty($arrayfields['s.zip']['checked'])) {
 				print '<td></td>';
@@ -1008,9 +1010,9 @@ if (isModEnabled('facture') && $user->hasRight('facture', 'lire')) {
 				$societe = new Societe($db);
 				$societe->fetch($socid);
 				$societe_name = dol_sanitizeFileName($societe->name);
-				setEventMessages($langs->trans("RemainderToTakeForCompanyAtDateOf", $societe_name, dol_print_date($customersOwedDate, "%d/%m/%Y"), price($total_ttc - $total_amount)), null, 'mesgs');
+				setEventMessages($langs->trans("RemainderToTakeForCompanyAtDateOf", $societe_name, dol_print_date($customersOwedDate, "day"), price($customersOwedReport->getTotalCustomersOwed())), null, 'mesgs');
 			} else {
-				setEventMessages($langs->trans("RemainderToTakeAtDateOf", dol_print_date($customersOwedDate, "%d/%m/%Y"), price($total_ttc - $total_amount)), null, 'mesgs');
+				setEventMessages($langs->trans("RemainderToTakeAtDateOf", dol_print_date($customersOwedDate, "day"), price($customersOwedReport->getTotalCustomersOwed())), null, 'mesgs');
 			}
 		}
 		else {
