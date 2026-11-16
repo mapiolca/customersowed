@@ -83,7 +83,7 @@ class modCustomersOwed extends DolibarrModules
 		$this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
 
 		// Name of image file used for this module.
-		$this->picto = 'customersowed@customersowed';
+		$this->picto = 'bill';
 
 		// Defined all module parts (triggers, login, substitutions, menus, css, etc...)
 		$this->module_parts = array(

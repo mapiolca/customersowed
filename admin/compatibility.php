@@ -70,7 +70,7 @@ dol_include_once('/customersowed/core/modules/modCustomersOwed.class.php');
 $descriptor = new modCustomersOwed($db);
 llxHeader('', $langs->trans('Compatibility'));
 $linkback = '<a href="'.DOL_URL_ROOT.'/admin/modules.php?search_keyword=customersowed">'.$langs->trans('BackToModuleList').'</a>';
-print load_fiche_titre($langs->trans('Compatibility'), $linkback, 'customersowed@customersowed');
+print load_fiche_titre($langs->trans('Compatibility'), $linkback, 'bill');
 print dol_get_fiche_head(customersowedAdminPrepareHead(), 'compatibility', $descriptor->name, -1, $descriptor->picto);
 print '<div class="div-table-responsive-no-min"><table class="noborder centpercent">';
 foreach (array('Dolibarr' => DOL_VERSION, 'PHP' => PHP_VERSION, 'Version' => $descriptor->version,

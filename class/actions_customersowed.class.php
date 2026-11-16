@@ -84,42 +84,23 @@ class ActionsCustomersOwed
 	 */
 	public function __construct($db)
 	{
-		global $langs, $conf, $mysoc;
-
+		// Binary requests may construct hooks without translations or company context.
 		$this->db = $db;
+	}
 
-		// Define output language
-		$outputlangs = $langs;
-		/*
-		 * $newlang = '';
-		 * $lang_id = GETPOST('lang_id');
-		 * if (getDolGlobalString('MAIN_MULTILANGS') && empty($newlang) && ! empty($lang_id))
-		 * $newlang = $lang_id;
-		 * if (getDolGlobalString('MAIN_MULTILANGS') && empty($newlang))
-		 * $newlang = $mysoc->default_lang;
-		 * if (! empty($newlang)) {
-		 * $outputlangs->setDefaultLang($newlang);
-		 * }
-		 * $this->outputlangs = $outputlangs;
-		 */
-		$this->outputlangs = new Translate("", $conf);
-		$newlang = $mysoc->default_lang;
-		if (! empty($newlang)) {
-			$this->outputlangs->setDefaultLang($newlang);
+	/** Initialize report translations only for report generation or the scheduled job. */
+	private function initReportLanguage()
+	{
+		global $conf, $mysoc;
+
+		$this->outputlangs = new Translate('', $conf);
+		if (is_object($mysoc) && !empty($mysoc->default_lang)) {
+			$this->outputlangs->setDefaultLang($mysoc->default_lang);
 		}
 		$this->outputlangs->loadLangs(array(
-			"main",
-			"errors",
-			"companies",
-			"install",
-			"other",
-			"admin",
-			"bills",
-			"members",
-			"cron",
-			"customersowed@customersowed"));
-
-		return 1;
+			'main', 'errors', 'companies', 'install', 'other', 'admin',
+			'bills', 'members', 'cron', 'customersowed@customersowed'
+		));
 	}
 
 	/**
@@ -150,7 +131,7 @@ class ActionsCustomersOwed
 
 		dol_syslog(get_class($this) . "::generateCustomersowedPdf " . "Start generating PDF fileNameToSend = '" . $this->fileNameToSend . "' model = '" . $model . "' socid = '" . $socid . "' sortfield = '" . $sortfield . "' sortorder = '" . $sortorder . "' ", LOG_DEBUG);
 
-		$sav_charset_output = $this->outputlangs->charset_output;
+		$this->initReportLanguage();
 
 		// Search template files
 		$type = 'customersowed';
@@ -448,6 +429,7 @@ class ActionsCustomersOwed
 			$this->error = 'NotEnoughPermissions';
 			return -1;
 		}
+		$this->initReportLanguage();
 		$report = new CustomersOwed($this->db, dol_now(),
 			getDolGlobalInt('CUSTOMERSOWEDREPORT_EXCLUDE_DP'), getDolGlobalInt('CUSTOMERSOWEDREPORT_ONLY_LATE'));
 		if ($report->fetch_lines() < 0 || ($directory = $report->getReportDirectory($user)) === false) {
