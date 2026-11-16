@@ -42,6 +42,105 @@ function compareSocNom($soc1, $soc2) {
  */
 class pdf_malliaros
 {
+	// Layout and generation state (declared for PHP 8.2+).
+	/** @var DoliDB|null */
+	public $db;
+
+	/** @var string|null */
+	public $description;
+
+	/** @var array<int, float>|null */
+	public $format;
+
+	/** @var int|float|string|null */
+	public $line_height;
+
+	/** @var int|float|string|null */
+	public $line_per_page;
+
+	/** @var int|float|string|null */
+	public $marge_basse;
+
+	/** @var int|float|string|null */
+	public $marge_droite;
+
+	/** @var int|float|string|null */
+	public $marge_gauche;
+
+	/** @var int|float|string|null */
+	public $marge_haute;
+
+	/** @var string|null */
+	public $name;
+
+	/** @var int|float|string|null */
+	public $page_hauteur;
+
+	/** @var int|float|string|null */
+	public $page_largeur;
+
+	/** @var int|float|string|null */
+	public $posxColumnToAdd0;
+
+	/** @var int|float|null Position of optional report column. */
+	public $posxColumnToAdd1;
+
+	/** @var int|float|null Position of optional report column. */
+	public $posxColumnToAdd2;
+
+	/** @var int|float|null Position of optional report column. */
+	public $posxColumnToAdd3;
+
+	/** @var int|float|null Position of optional report column. */
+	public $posxColumnToAdd4;
+
+	/** @var int|float|null Position of optional report column. */
+	public $posxColumnToAdd5;
+
+	/** @var int|float|string|null */
+	public $posxCompany;
+
+	/** @var int|float|string|null */
+	public $posxDateDue;
+
+	/** @var int|float|string|null */
+	public $posxInvoiceAmountTTC;
+
+	/** @var int|float|string|null */
+	public $posxLate;
+
+	/** @var int|float|string|null */
+	public $posxLeft;
+
+	/** @var int|float|string|null */
+	public $posxReceived;
+
+	/** @var int|float|string|null */
+	public $posxRtp;
+
+	/** @var int|float|string|null */
+	public $posxTotal_ht;
+
+	/** @var int|float|string|null */
+	public $posxTotal_vat;
+
+	/** @var array<string, string>|null */
+	public $result;
+
+	/** @var int|float|string|null */
+	public $tabTop;
+
+	/** @var int|float|string|null */
+	public $tab_height;
+
+	/** @var int|float|string|null */
+	public $tab_width;
+
+	/** @var string|null */
+	public $type;
+
+	/** @var int|float|string|null */
+	public $widthRtp;
 
     public $doc_type;
 

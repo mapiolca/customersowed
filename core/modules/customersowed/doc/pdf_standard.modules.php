@@ -34,6 +34,74 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
  */
 class pdf_standard
 {
+	// Layout and generation state (declared for PHP 8.2+).
+	/** @var DoliDB|null */
+	public $db;
+
+	/** @var string|null */
+	public $description;
+
+	/** @var array<int, float>|null */
+	public $format;
+
+	/** @var int|float|string|null */
+	public $line_height;
+
+	/** @var int|float|string|null */
+	public $line_per_page;
+
+	/** @var int|float|string|null */
+	public $marge_basse;
+
+	/** @var int|float|string|null */
+	public $marge_droite;
+
+	/** @var int|float|string|null */
+	public $marge_gauche;
+
+	/** @var int|float|string|null */
+	public $marge_haute;
+
+	/** @var string|null */
+	public $name;
+
+	/** @var int|float|string|null */
+	public $page_hauteur;
+
+	/** @var int|float|string|null */
+	public $page_largeur;
+
+	/** @var int|float|string|null */
+	public $posxCompany;
+
+	/** @var int|float|string|null */
+	public $posxDateDue;
+
+	/** @var int|float|string|null */
+	public $posxInvoiceAmountTTC;
+
+	/** @var int|float|string|null */
+	public $posxLate;
+
+	/** @var int|float|string|null */
+	public $posxLeft;
+
+	/** @var int|float|string|null */
+	public $posxReceived;
+
+	/** @var array<string, string>|null */
+	public $result;
+
+	/** @var int|float|string|null */
+	public $tabTop;
+
+	/** @var int|float|string|null */
+	public $tab_height;
+
+	/** @var string|null */
+	public $type;
+
+
 	public $doc_type;
 
 	public $documentDate;

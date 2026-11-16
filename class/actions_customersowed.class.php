@@ -71,6 +71,15 @@ class ActionsCustomersOwed
 
 	public $fileNameToSend;
 
+	/** @var string Job output displayed by the native scheduler. */
+	public $output = '';
+
+	/** @var string Mail delivery result. */
+	public $result = '';
+
+	/** @var int Last job result. */
+	public $lastresult = 0;
+
 	/**
 	 * Constructor
 	 *
@@ -79,42 +88,23 @@ class ActionsCustomersOwed
 	 */
 	public function __construct($db)
 	{
-		global $langs, $conf, $mysoc;
-
+		// Hooks are also constructed for binary requests without translations or company.
 		$this->db = $db;
+	}
 
-		// Define output language
-		$outputlangs = $langs;
-		/*
-		 * $newlang = '';
-		 * $lang_id = GETPOST('lang_id');
-		 * if ($conf->global->MAIN_MULTILANGS && empty($newlang) && ! empty($lang_id))
-		 * $newlang = $lang_id;
-		 * if ($conf->global->MAIN_MULTILANGS && empty($newlang))
-		 * $newlang = $mysoc->default_lang;
-		 * if (! empty($newlang)) {
-		 * $outputlangs->setDefaultLang($newlang);
-		 * }
-		 * $this->outputlangs = $outputlangs;
-		 */
-		$this->outputlangs = new Translate("", $conf);
-		$newlang = $mysoc->default_lang;
-		if (! empty($newlang)) {
-			$this->outputlangs->setDefaultLang($newlang);
+	/** Prepare the report language only when generating a report or running its job. */
+	private function initReportLanguage()
+	{
+		global $conf, $mysoc;
+
+		$this->outputlangs = new Translate('', $conf);
+		if (is_object($mysoc) && !empty($mysoc->default_lang)) {
+			$this->outputlangs->setDefaultLang($mysoc->default_lang);
 		}
 		$this->outputlangs->loadLangs(array(
-			"main",
-			"errors",
-			"companies",
-			"install",
-			"other",
-			"admin",
-			"bills",
-			"members",
-			"cron",
-			"customersowed@customersowed"));
-
-		return 1;
+			'main', 'errors', 'companies', 'install', 'other', 'admin',
+			'bills', 'members', 'cron', 'customersowed@customersowed'
+		));
 	}
 
 	/**
@@ -335,7 +325,7 @@ class ActionsCustomersOwed
 
 		dol_syslog(get_class($this) . "::generateCustomersowedPdf " . "Start generating PDF fileNameToSend = '" . $this->fileNameToSend . "' model = '" . $model . "' socid = '" . $socid . "' sortfield = '" . $sortfield . "' sortorder = '" . $sortorder . "' ", LOG_DEBUG);
 
-		$sav_charset_output = $outputlangs->charset_output;
+		$this->initReportLanguage();
 
 		// Search template files
 		$type = 'customersowed';
@@ -370,7 +360,7 @@ class ActionsCustomersOwed
 			dol_syslog(get_class($this) . "::generateCustomersowedPdf " . "Error during generating PDF : Module not found - model = '" . $model . "' socid = '" . $socid . "' sortfield = '" . $sortfield . "' sortorder = '" . $sortorder . "' ", LOG_ERR);
 		}
 
-		$this->error = $this->errors[0];
+		$this->error = isset($this->errors[0]) ? $this->errors[0] : '';
 
 		return $error ? - 1 : 0;
 	}
@@ -667,7 +657,7 @@ class ActionsCustomersOwed
 			}
 		}
 
-		$this->error = $this->errors[0];
+		$this->error = isset($this->errors[0]) ? $this->errors[0] : '';
 
 		return $error ? - 1 : 0;
 	}
@@ -680,6 +670,8 @@ class ActionsCustomersOwed
 	function sendMails()
 	{
 		global $conf;
+
+		$this->initReportLanguage();
 
 		$error = 0;
 		$this->output = "";
@@ -823,7 +815,7 @@ class ActionsCustomersOwed
 
 		$this->error = "";
 		if ($error > 0) {
-			$this->error = $this->errors[0];
+			$this->error = isset($this->errors[0]) ? $this->errors[0] : '';
 			print "\n" . $this->error;
 		}
 

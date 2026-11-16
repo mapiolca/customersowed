@@ -56,7 +56,7 @@ function customersowedAdminPrepareHead()
 	// $this->tabs = array(
 	// 'entity:-tabname:Title:@customersowed:/customersowed/mypage.php?id=__ID__'
 	// ); // to remove a tab
-	complete_head_from_modules($conf, $langs, $object, $head, $h, 'customersowed');
+	complete_head_from_modules($conf, $langs, null, $head, $h, 'customersowed');
 
 	return $head;
 }

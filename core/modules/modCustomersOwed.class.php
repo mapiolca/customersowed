@@ -74,13 +74,13 @@ class modCustomersOwed extends DolibarrModules
 		$this->editor_url = 'https://www.joliciel.fr';
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.4.3';
+		$this->version = '1.4.4';
 
 		// Key used in llx_const table to save module status enabled/disabled (where CUSTOMERSOWEDREPORT is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
 
 		// Name of image file used for this module.
-		$this->picto = 'customersowed@customersowed';
+		$this->picto = 'bill';
 
 		// Defined all module parts (triggers, login, substitutions, menus, css, etc...)
 		$this->module_parts = array(
