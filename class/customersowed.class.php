@@ -465,6 +465,74 @@ class CustomersOwed extends CommonObject
  */
 class CustomersOwedLine extends CommonObjectLine
 {
+	// Invoice and third-party values used by report rows.
+	/** @var int|float|string|null */
+	public $address;
+
+	/** @var int|float|string|null */
+	public $am;
+
+	/** @var int|float|string|null */
+	public $country_code_iso;
+
+	/** @var int|float|string|null */
+	public $date;
+
+	/** @var int|float|string|null */
+	public $datec;
+
+	/** @var int|float|string|null */
+	public $email;
+
+	/** @var bool|null */
+	public $excludeDpInvoices;
+
+	/** @var int|float|string|null */
+	public $fk_mode_reglement;
+
+	/** @var int|float|string|null */
+	public $fk_soc;
+
+	/** @var int|float|string|null */
+	public $mode_reglement_code;
+
+	/** @var int|float|string|null */
+	public $onlyInvoicesCreatedBy;
+
+	/** @var bool|null */
+	public $onlyLatePaymentInvoices;
+
+	/** @var int|float|string|null */
+	public $phone;
+
+	/** @var int|float|string|null */
+	public $project_label;
+
+	/** @var int|float|string|null */
+	public $project_ref;
+
+	/** @var int|float|string|null */
+	public $ref_client;
+
+	/** @var int|float|string|null */
+	public $state_nom;
+
+	/** @var int|float|string|null */
+	public $total_vat;
+
+	/** @var int|float|string|null */
+	public $town;
+
+	/** @var int|float|string|null */
+	public $type;
+
+	/** @var int|float|string|null */
+	public $typent_code;
+
+	/** @var int|float|string|null */
+	public $zip;
+
+
 
     /**
      *

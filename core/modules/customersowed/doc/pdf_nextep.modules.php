@@ -34,6 +34,104 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
  */
 class pdf_nextep
 {
+	// Layout and generation state (declared for PHP 8.2+).
+	/** @var int|float|string|null */
+	public $dateColumnWidth;
+
+	/** @var DoliDB|null */
+	public $db;
+
+	/** @var string|null */
+	public $description;
+
+	/** @var array<int, float>|null */
+	public $format;
+
+	/** @var int|float|string|null */
+	public $line_height;
+
+	/** @var int|float|string|null */
+	public $line_per_page;
+
+	/** @var int|float|string|null */
+	public $marge_basse;
+
+	/** @var int|float|string|null */
+	public $marge_droite;
+
+	/** @var int|float|string|null */
+	public $marge_gauche;
+
+	/** @var int|float|string|null */
+	public $marge_haute;
+
+	/** @var string|null */
+	public $name;
+
+	/** @var int|float|string|null */
+	public $page_hauteur;
+
+	/** @var int|float|string|null */
+	public $page_largeur;
+
+	/** @var int|float|string|null */
+	public $posx180days;
+
+	/** @var int|float|string|null */
+	public $posx30days;
+
+	/** @var int|float|string|null */
+	public $posx60days;
+
+	/** @var int|float|string|null */
+	public $posx90days;
+
+	/** @var int|float|string|null */
+	public $posxCompany;
+
+	/** @var int|float|string|null */
+	public $posxDateDue;
+
+	/** @var int|float|string|null */
+	public $posxLate;
+
+	/** @var int|float|string|null */
+	public $posxLeft;
+
+	/** @var int|float|string|null */
+	public $posxMore180days;
+
+	/** @var int|float|string|null */
+	public $posxTotal_ht;
+
+	/** @var int|float|string|null */
+	public $posxTotal_vat;
+
+	/** @var array<string, string>|null */
+	public $result;
+
+	/** @var int|float|string|null */
+	public $tabTop;
+
+	/** @var int|float|string|null */
+	public $tab_height;
+
+	/** @var int|float|string|null */
+	public $tab_width;
+
+	/** @var int|float|string|null */
+	public $totalColumnWidth;
+
+	/** @var string|null */
+	public $type;
+
+	/** @var int|float|string|null */
+	public $widthDateDue;
+
+	/** @var int|float|string|null */
+	public $widthRtp;
+
+
 
 	public $doc_type;
 

@@ -1,3 +1,10 @@
+## 1.4.4 — 2026-11-16
+- Remplacer les anciens pictogrammes des réglages par le pictogramme natif des factures.
+- Différer les traductions des rapports pour permettre le chargement des images sans contexte de traduction ou de société.
+- Déclarer les propriétés des modèles PDF, des lignes et des résultats de tâche pour PHP 8.2 et versions suivantes.
+- Corriger une variable absente dans les onglets de réglages et une lecture d’erreur vide après génération.
+
+
 
 FR
 ## 1.4.3
