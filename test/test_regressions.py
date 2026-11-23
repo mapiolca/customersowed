@@ -43,6 +43,71 @@ class Regressions(unittest.TestCase):
         """, [("class/actions_customersowed.class.php", "ActionsCustomersOwed")])
         self.assertEqual(output, "")
 
+    def test_report_loading_without_translations(self):
+        run_php("""
+        class CommonObject { public $error = ''; }
+        class CommonObjectLine {}
+        class Facture { const STATUS_DRAFT = 0; const STATUS_VALIDATED = 1; const STATUS_CLOSED = 2; const TYPE_CREDIT_NOTE = 2; }
+        class CustomersOwedCompatibility {
+            public static function getFeatures() {
+                return array('CustomersOwedReportCapability' => array('available' => true));
+            }
+        }
+        class ReportActor {
+            public $id = 7;
+            public $socid = 0;
+            public $allowed = false;
+            public function hasRight(...$permission) { return $this->allowed; }
+        }
+        class ReportLanguage {
+            public function transnoentities($key, ...$arguments) { return 'translated-title'; }
+        }
+        function dol_now() { return 1700000000; }
+        function dol_print_date($date, $format) { return '2023-11-14'; }
+        function isModEnabled($module) { return $module !== 'projet'; }
+        function getEntity($module) { return '1'; }
+        define('MAIN_DB_PREFIX', 'erp_');
+        class ReportDatabase {
+            public $fail = false;
+            public function escape($text) { return $text; }
+            public function sanitize($text) { return $text; }
+            public function query($sql) { return !$this->fail; }
+            public function fetch_object($result) { return false; }
+            public function free($result) {}
+            public function lasterror() { return 'fixture-query-failed'; }
+        }
+        $actor = new ReportActor();
+        foreach (array(false, true) as $withTranslations) {
+            $langs = $withTranslations ? new ReportLanguage() : null;
+            ob_start();
+            $db = new ReportDatabase();
+            $report = new CustomersOwed($db);
+            if (ob_get_clean() !== '') { throw new Exception('Binary output polluted'); }
+            if ($withTranslations && $report->title !== 'translated-title') {
+                throw new Exception('Translated report title changed');
+            }
+            $actor->allowed = false;
+            if ($report->fetch_lines(null, null, null, $actor) !== -1
+                || $report->error !== 'NotEnoughPermissions') {
+                throw new Exception('Permission refusal changed');
+            }
+            $actor->allowed = true;
+            if ($report->fetch_lines(null, 'invalid.column', null, $actor) !== -1
+                || $report->error !== 'ErrorBadParameters') {
+                throw new Exception('Invalid sort accepted');
+            }
+            if ($report->fetch_lines(null, null, null, $actor) !== 1
+                || $report->lines_count !== 0 || $report->error !== '') {
+                throw new Exception('Authorized empty report failed');
+            }
+            $db->fail = true;
+            if ($report->fetch_lines(null, null, null, $actor) !== -1
+                || $report->error !== 'fixture-query-failed') {
+                throw new Exception('Database failure hidden');
+            }
+        }
+        """, [("class/customersowed.class.php", "CustomersOwed")])
+
     def test_report_line_constructor_without_dynamic_properties(self):
         run_php("""
         class CommonObject {}

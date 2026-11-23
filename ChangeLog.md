@@ -3,6 +3,7 @@
 
 FR
 ## 2.0.0 — en préparation
+ - Permettre le chargement du rapport par le contrôle documentaire sans traductions initialisées ; conserver les refus de droits et les erreurs techniques sans dépendre de `$langs`.
  - Utiliser le pictogramme facture natif dans les trois onglets de réglages et différer les traductions des rapports afin que la construction des hooks ne dépende pas du contexte société/traduction des requêtes d’images. Vérifier les constructeurs PDF et lignes sans propriétés dynamiques sous PHP 8.4.
  - Améliorer le mail de rapport selon le modèle de newsletter fourni, avec date du rapport, synthèse et créance par facture ; conserver les modèles personnalisés. Dans les quatre modèles PDF, utiliser les blocs natifs émetteur/destinataire et le code client pour un rapport limité à un tiers, et uniquement l’émetteur pour les rapports internes ou multi-tiers.
  - Maintenir le rapport, le widget, les quatre modèles PDF et les emails sur un socle déclaré Dolibarr 20+/PHP 8.0+ ; classement dans « Joliciel x Les Métiers du Bâtiment » et onglets Compatibilité/À propos issus du descripteur.

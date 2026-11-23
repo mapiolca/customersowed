@@ -158,7 +158,7 @@ class CustomersOwed extends CommonObject
 	 */
 	public function __construct($db, $customersOwedDate = null, $excludeDpInvoices = false, $onlyLatePaymentInvoices = false, $onlyInvoicesCreatedBy = null, $onlyInvoicesWhoseSalesRepresentativeIs = null)
 	{
-		global $langs, $conf;
+		global $langs;
 
 		$this->db = $db;
 		if ($customersOwedDate == null) {
@@ -177,8 +177,10 @@ class CustomersOwed extends CommonObject
 			$this->today = false;
 		}
 
-		// $this->title = $langs->transnoentities("CustomersOwedAtDateOf", dol_print_date($this->customersOwedDate, "day"));
-		$this->title = $langs->transnoentities("BillsCustomersUnpaidAtDateOf", dol_print_date($this->customersOwedDate, "day"));
+		// Document authorization may load the report under NOREQUIRETRAN.
+		$this->title = isset($langs) && is_object($langs)
+			? $langs->transnoentities("BillsCustomersUnpaidAtDateOf", dol_print_date($this->customersOwedDate, "day"))
+			: "BillsCustomersUnpaidAtDateOf";
 	}
 
 	/**
@@ -192,7 +194,7 @@ class CustomersOwed extends CommonObject
 	 */
 	public function fetch_lines($socid = null, $sortfield = null, $sortorder = null, $actor = null, $limit = 0, $offset = 0)
 	{
-		global $conf, $langs, $hookmanager;
+		global $conf, $hookmanager;
 		global $user;
 		$reportUser = $actor ?: $user;
 		$this->lines = array();
@@ -203,13 +205,13 @@ class CustomersOwed extends CommonObject
 		if (!CustomersOwedCompatibility::getFeatures()['CustomersOwedReportCapability']['available'] || !isModEnabled('customersowed')
 			|| !$reportUser->hasRight('customersowed', 'read')
 			|| !$reportUser->hasRight('facture', 'lire') || !$reportUser->hasRight('societe', 'lire')) {
-			$this->error = $langs->trans('NotEnoughPermissions');
+			$this->error = 'NotEnoughPermissions';
 			return -1;
 		}
 		$socid = (int) $socid;
 		if (!empty($reportUser->socid)) {
 			if ($socid > 0 && $socid !== (int) $reportUser->socid) {
-				$this->error = $langs->trans('NotEnoughPermissions');
+				$this->error = 'NotEnoughPermissions';
 				return -1;
 			}
 			$socid = (int) $reportUser->socid;
@@ -227,7 +229,7 @@ class CustomersOwed extends CommonObject
 			$field = $aliases[$field] ?? $field;
 			$order = strtoupper(trim($orders[$key] ?? $orders[0]));
 			if (!in_array($field, $allowedSorts, true) || !in_array($order, array('ASC', 'DESC'), true)) {
-				$this->error = $langs->trans('ErrorBadParameters');
+				$this->error = 'ErrorBadParameters';
 				return -1;
 			}
 			$expression = $field === 'am' ? '(COALESCE(pay.amount, 0) + COALESCE(credit.amount, 0))'
@@ -239,7 +241,7 @@ class CustomersOwed extends CommonObject
 		$invoiceEntities = array_map('intval', explode(',', getEntity('invoice')));
 		$selectedEntities = array_values(array_intersect($invoiceEntities, $this->selectedEntities));
 		if ($this->selectedEntities && !$selectedEntities) {
-			$this->error = $langs->trans('NotEnoughPermissions');
+			$this->error = 'NotEnoughPermissions';
 			return -1;
 		}
 		$entities = $selectedEntities ?: $invoiceEntities;
