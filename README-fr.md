@@ -1,3 +1,5 @@
+<!-- Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr> -->
+
 # Module 'Dû clients'
 
 ## Caractéristiques
@@ -61,7 +63,7 @@ Dans votre navigateur :
 
   - Connectez-vous à Dolibarr en tant que super administrateur.
   - Allez dans ```Accueil - Configuration - Modules```
-  - Vous devriez maintenant pouvoir trouver et activer le module 'Dû clients' dans la partie 'Modules financiers (Compta/trésorerie)'
+  - Vous devriez maintenant pouvoir trouver et activer le module 'Dû clients' dans la partie 'Joliciel x Les Métiers du Bâtiment'
 
 
 ## Licences
@@ -93,7 +95,12 @@ Faire une nouvelle version :
 0) git pull
 1) incrémenter le n° de version dans /var/www/htdocs/custom/customersowed/core/modules/modcustomersowed.class.php
 2) changer le n° de version dans /var/www/htdocs/custom/customersowed/.github/workflows/master.yml
-3) ajouter le n° de version et une description dans /var/www/htdocs/custom/customersowed/CHANGELOG.md
+3) ajouter le n° de version et une description dans /var/www/htdocs/custom/customersowed/ChangeLog.md
 4) git add . ; git commit -m "laDescription" ; git push
 5) git tag 1.4.3 ; git push --tags 
 
+
+## Préparation v2.0.0
+
+Famille : **Joliciel x Les Métiers du Bâtiment**.
+Audit et travaux avant publication : [V2.0.0-AUDIT.md](V2.0.0-AUDIT.md). La conformité complète et la compatibilité v20+/PHP 8.0+ restent à valider.

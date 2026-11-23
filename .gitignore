@@ -1,0 +1,6 @@
+# Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr>
+
+error_log
+*.log
+__pycache__/
+*.pyc

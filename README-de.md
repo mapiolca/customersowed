@@ -1,3 +1,5 @@
+<!-- Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr> -->
+
 # Modul 'Aufgrund der Kunden'
 
 ## Funktionen
@@ -61,7 +63,7 @@ In Ihrem Browser:
 
   - Melden Sie sich als Superadministrator bei Dolibarr an.
   - Gehen Sie zu ```Home - Konfiguration - Module```
-  - Sie sollten jetzt das Modul 'Due Customers' im Abschnitt 'Financial Modules' finden und aktivieren können.
+  - Sie sollten jetzt das Modul 'Due Customers' im Abschnitt 'Joliciel x Les Métiers du Bâtiment' finden und aktivieren können.
 
 
 ## Lizenzen

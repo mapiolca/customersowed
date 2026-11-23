@@ -4,6 +4,7 @@
  * Copyright (C) 2006-2014 Laurent Destailleur <eldy@users.sourceforge.net>
  * Copyright (C) 2015 Charles-Fr BENKE <charles.fr@benke.fr>
  * Copyright (C) 2018 Laurent BOUQUET <dolibarr@joliciel.fr>
+ * Copyright (C) 2026 Pierre Ardoin <developpeur@lesmetiersdubatiment.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +33,43 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 /**
  * Classe permettant de generer un document PDF de 'Dû clients'
  */
+require_once __DIR__.'/../../../../class/customersowedpdflayout.trait.php';
+
 class pdf_nextep
 {
+	use CustomersOwedPdfLayout;
+	public $dateColumnWidth;
+	public $db;
+	public $description;
+	public $format;
+	public $line_height;
+	public $line_per_page;
+	public $marge_basse;
+	public $marge_droite;
+	public $marge_gauche;
+	public $marge_haute;
+	public $name;
+	public $page_hauteur;
+	public $page_largeur;
+	public $posx180days;
+	public $posx30days;
+	public $posx60days;
+	public $posx90days;
+	public $posxCompany;
+	public $posxDateDue;
+	public $posxLate;
+	public $posxLeft;
+	public $posxMore180days;
+	public $posxTotal_ht;
+	public $posxTotal_vat;
+	public $result;
+	public $tabTop;
+	public $tab_height;
+	public $tab_width;
+	public $totalColumnWidth;
+	public $type;
+	public $widthDateDue;
+	public $widthRtp;
 
 	public $doc_type;
 
@@ -86,7 +122,7 @@ class pdf_nextep
 		$this->description = $langs->trans('PDFNextepCustomersOwedsModel');
 
 		$this->warning_image_path = DOL_DOCUMENT_ROOT . "/theme/" . $conf->theme . "/img/warning.png";
-		$CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME = $conf->global->CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME;
+		$CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME = getDolGlobalString('CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME');
 		if ($CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME) {
 			$this->warning_image_path = DOL_DOCUMENT_ROOT . "/theme/" . $conf->theme . "/img/" . $CUSTOMERSOWEDREPORT_WARNING_IMAGE_NAME . ".png";
 		}
@@ -112,10 +148,10 @@ class pdf_nextep
 			$this->page_largeur,
 			$this->page_hauteur);
 
-		$this->marge_gauche = isset($conf->global->MAIN_PDF_MARGIN_LEFT) ? $conf->global->MAIN_PDF_MARGIN_LEFT : 10;
-		$this->marge_droite = isset($conf->global->MAIN_PDF_MARGIN_RIGHT) ? $conf->global->MAIN_PDF_MARGIN_RIGHT : 10;
-		$this->marge_haute = isset($conf->global->MAIN_PDF_MARGIN_TOP) ? $conf->global->MAIN_PDF_MARGIN_TOP : 10;
-		$this->marge_basse = isset($conf->global->MAIN_PDF_MARGIN_BOTTOM) ? $conf->global->MAIN_PDF_MARGIN_BOTTOM : 10;
+		$this->marge_gauche = getDolGlobalString('MAIN_PDF_MARGIN_LEFT') !== '' ? getDolGlobalString('MAIN_PDF_MARGIN_LEFT') : 10;
+		$this->marge_droite = getDolGlobalString('MAIN_PDF_MARGIN_RIGHT') !== '' ? getDolGlobalString('MAIN_PDF_MARGIN_RIGHT') : 10;
+		$this->marge_haute = getDolGlobalString('MAIN_PDF_MARGIN_TOP') !== '' ? getDolGlobalString('MAIN_PDF_MARGIN_TOP') : 10;
+		$this->marge_basse = getDolGlobalString('MAIN_PDF_MARGIN_BOTTOM') !== '' ? getDolGlobalString('MAIN_PDF_MARGIN_BOTTOM') : 10;
 
 		$this->tabTop = $this->marge_haute + 12;
 
@@ -178,6 +214,11 @@ class pdf_nextep
 		include_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 
 		global $conf, $hookmanager, $langs, $user;
+		if (!isModEnabled('customersowed') || !$user->hasRight('customersowed', 'write')) { $this->error = 'NotEnoughPermissions'; return -1; }
+		$expectedDirectory = $object->getReportDirectory($user);
+		if ($expectedDirectory === false || !is_string($file) || realpath(dirname($file)) !== realpath($expectedDirectory)
+			|| basename($file) !== $object->pdfreportfilename || is_link($file)) { $this->error = 'ErrorBadParameters'; return -1; }
+
 
 		// Translations
 		$langs->loadLangs(array(
@@ -187,7 +228,7 @@ class pdf_nextep
 		if (! is_object($outputLangs))
 			$outputLangs = $langs;
 		// For backward compatibility with FPDF, force output charset to ISO, because FPDF expect text to be encoded in ISO
-		if (! empty($conf->global->MAIN_USE_FPDF))
+		if (getDolGlobalString('MAIN_USE_FPDF') !== '')
 			$outputLangs->charset_output = 'ISO-8859-1';
 
 		// Add pdfgeneration hook
@@ -218,7 +259,7 @@ class pdf_nextep
 		$pdf->SetDrawColor(128, 128, 128);
 
 		if (empty($socid)) {
-			if ($user->societe_id) {
+			if ($user->socid) {
 				$socid = $user->socid;
 			}
 		}
@@ -232,23 +273,25 @@ class pdf_nextep
 		$this->onlyInvoicesCreatedBy = $object->onlyInvoicesCreatedBy;
 		$this->onlyInvoicesWhoseSalesRepresentativeIs = $object->onlyInvoicesWhoseSalesRepresentativeIs;
 
-		if ($socid > 0) {
+		$this->reportRecipient = null;
+		if ($socid > 0 && $object->lines && count(array_filter($object->lines, static function ($line) use ($socid) { return (int) $line->fk_soc !== (int) $socid; })) === 0) {
 			$societe = new Societe($this->db);
-			$societe->fetch($socid);
+			if ($societe->fetch($socid) <= 0) { $this->error = 'ErrorRecordNotFound'; return -1; }
+			$this->reportRecipient = $societe;
 			if (empty($object->title)) {
-				// $title = $outputLangs->transnoentities("BillsCustomersUnpaidForCompanyAtDateOf", $societe->name, dol_print_date(dol_now(), "%d/%m/%Y"));
+				// $title = $outputLangs->transnoentities("BillsCustomersUnpaidForCompanyAtDateOf", $societe->name, dol_print_date(dol_now(), "day"));
 				$object->title = $outputLangs->transnoentities("BillsCustomersUnpaidForCompany", $societe->name);
 			}
 		} else {
-			$object->title = $outputLangs->transnoentities("CustomersOwedTimetableAtDateOf", dol_print_date($this->customersOwedDate, "%d/%m/%Y"));
+			$object->title = $outputLangs->transnoentities("CustomersOwedTimetableAtDateOf", dol_print_date($this->customersOwedDate, "day"));
 		}
 		$this->title = $object->title;
 
-		$pdf->SetTitle($conf->global->MAIN_INFO_SOCIETE_NOM . " - " . $title);
+		$pdf->SetTitle(getDolGlobalString('MAIN_INFO_SOCIETE_NOM') . " - " . $object->title);
 		$pdf->SetSubject($outputLangs->transnoentities("ModuleCustomersOwed"));
 		$pdf->SetCreator("Dolibarr " . DOL_VERSION . " (http://www.joliciel.fr)");
 		$pdf->SetAuthor($outputLangs->convToOutputCharset($user->getFullName($outputLangs)));
-		if (! empty($conf->global->MAIN_DISABLE_PDF_COMPRESSION))
+		if (getDolGlobalString('MAIN_DISABLE_PDF_COMPRESSION') !== '')
 			$pdf->SetCompression(false);
 
 		$pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite); // Left, Top, Right
@@ -257,6 +300,8 @@ class pdf_nextep
 
 		// New page
 		$pdf->AddPage();
+		$this->prepareReportHeader($pdf, $outputLangs);
+		if (!$this->prepareReportLayout($pdf, $object, $outputLangs)) { return -1; }
 		$pagenb ++;
 		$this->_pageHeaderAndFooter($pdf, $pagenb, $outputLangs, $socid, $sortfield, $sortorder);
 		$pdf->SetFont('', '', 9);
@@ -275,6 +320,7 @@ class pdf_nextep
 		if (method_exists($pdf, 'AliasNbPages'))
 			$pdf->AliasNbPages();
 
+		$this->_pagefoot($pdf, $object, $outputLangs, 0);
 		$pdf->Close();
 
 		$pdf->Output($file, 'F');
@@ -293,8 +339,8 @@ class pdf_nextep
 		global $action;
 		$reshook = $hookmanager->executeHooks('afterPDFCreation', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 
-		if (! empty($conf->global->MAIN_UMASK))
-			@chmod($file, octdec($conf->global->MAIN_UMASK));
+		if (getDolGlobalString('MAIN_UMASK') !== '')
+			@chmod($file, octdec(getDolGlobalString('MAIN_UMASK')));
 
 		$this->result = array(
 			'fullpath' => $file);
@@ -325,26 +371,13 @@ class pdf_nextep
 		if (! is_object($outputLangs))
 			$outputLangs = $langs;
 		// For backward compatibility with FPDF, force output charset to ISO, because FPDF expect text to be encoded in ISO
-		if (! empty($conf->global->MAIN_USE_FPDF))
+		if (getDolGlobalString('MAIN_USE_FPDF') !== '')
 			$outputLangs->charset_output = 'ISO-8859-1';
 
 		$defaultFontSize = pdf_getPDFFontSize($outputLangs);
-		$pdf->SetFont('', '', $defaultFontSize - 4);
+		$this->printReportHeader($pdf, $outputLangs);
 
-		$pdf->SetXY($this->posxLeft, $this->marge_haute);
-		$pdf->Cell(80, $this->line_height, $conf->global->MAIN_INFO_SOCIETE_NOM, 0, 0, 'L');
-
-		// PDF document date
-		$pdf->SetXY($this->page_largeur - $this->marge_droite - 80, $this->marge_haute);
-		$pdf->Cell(80, $this->line_height, dol_print_date(time(), "day", false, $outputLangs, true), 0, 0, 'R');
-
-		// Title
-		$pdf->SetFont('', 'B', $defaultFontSize + 2);
-		$pdf->SetXY($this->marge_gauche, $this->marge_haute + ($this->line_height));
-		$pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche, $this->line_height, $this->title, 0, 'C', false, 0, '', '', true, 1, false, true, $this->line_height, 'T', true);
-		$pdf->SetFont('', '', $defaultFontSize);
-		
-		// Invoice number 
+		// Invoice number
 		$pdf->SetXY($this->posxLeft, $this->tabTop);
 		$pdf->Cell($this->posxDateDue - $this->posxLeft, $this->line_height, $outputLangs->transnoentities("Ref"), 'LTRB', 0, 'L', false, '', 1);
 
@@ -414,17 +447,6 @@ class pdf_nextep
 			$userstaticSalesRepresentativeIs->fetch($this->onlyInvoicesWhoseSalesRepresentativeIs);
 			$onlyInvoicesWhoseSalesRepresentativeIsMessage = $outputLangs->transnoentities('OnlyInvoicesWhoseSalesRepresentativeIs') . " " . trim($userstaticSalesRepresentativeIs->firstname . " " . $userstaticSalesRepresentativeIs->lastname);
 		}
-
-		$pdf->SetFont('', 'I', $defaultFontSize - 3);
-		$pdf->SetTextColor(128, 128, 128);
-		$pdf->SetXY($this->posxLeft, $this->page_hauteur - $this->marge_basse);
-		$pdf->Cell($this->page_largeur - $this->marge_droite - $this->marge_gauche, $this->line_height, trim($onlyLatePaymentInvoicesMessage . $excludeDpInvoicesMessage . $sortMessage. " " . $onlyInvoicesCreatedByMessage . " " . $onlyInvoicesWhoseSalesRepresentativeIsMessage), 0, 0, 'C', 0, false, '', 0);
-		$pdf->SetTextColor(0, 0, 0);
-
-		// Page number
-		$pdf->SetFont('', '', $defaultFontSize - 2);
-		$pdf->SetXY($this->page_largeur - $this->marge_droite - 20, $this->page_hauteur - $this->marge_basse);
-		$pdf->Cell(25, $this->line_height, $page . "/" . $pdf->getAliasNbPages(), 0, 0, 'R');
 	}
 
 	/**
@@ -453,7 +475,7 @@ class pdf_nextep
 		if (! is_object($outputLangs))
 			$outputLangs = $langs;
 		// For backward compatibility with FPDF, force output charset to ISO, because FPDF expect text to be encoded in ISO
-		if (! empty($conf->global->MAIN_USE_FPDF))
+		if (getDolGlobalString('MAIN_USE_FPDF') !== '')
 			$outputLangs->charset_output = 'ISO-8859-1';
 
 		$defaultFontSize = pdf_getPDFFontSize($outputLangs);
@@ -474,7 +496,7 @@ class pdf_nextep
 		$total_ttc_90days = 0;
 		$total_ttc_180days = 0;
 		$total_ttc_More180days = 0;
-		
+
 		$fill = false;
 		for ($i = 0; $i < $numLines; $i ++) {
 			$obj = $lines[$i];
@@ -483,6 +505,8 @@ class pdf_nextep
 
 			$facturestatic->ref = $obj->facnumber;
 			$facturestatic->id = $obj->id;
+			$facturestatic->type = $obj->type;
+			$facturestatic->entity = $obj->entity;
 			$facturestatic->statut = $obj->fk_statut;
 			$facturestatic->date_lim_reglement = $this->db->jdate($obj->date_lim_reglement);
 			$facturestatic->total_ttc = $obj->total_ttc;
@@ -496,11 +520,7 @@ class pdf_nextep
 			$totalpay = $obj->am;
 
 			$remaintopay = $facturestatic->total_ttc - $totalpay;
-			if ($facturestatic->type == Facture::TYPE_CREDIT_NOTE && $obj->paye == 1) {
-				$remaincreditnote = $discount->getAvailableDiscounts($obj->fk_soc, '', 'rc.fk_facture_source=' . $facturestatic->id);
-				$remaintopay = - $remaincreditnote;
-				$totalpay = $facturestatic->total_ttc - $remaintopay;
-			}
+
 
 			if ($numLines > $i + 2) {
 				$yChangePage = $this->tab_height;
@@ -513,6 +533,7 @@ class pdf_nextep
 				$pdf->SetXY($this->posxLeft, $this->tabTop + $this->line_height + $yp);
 				$pdf->Cell($this->page_largeur - $this->marge_gauche - $this->marge_droite, $this->line_height, '', 'T', 0, 'L', false, '', 1);
 				// New page
+				$this->_pagefoot($pdf, $this->reportObject, $outputLangs, 1);
 				$pdf->AddPage();
 				$page ++;
 				$this->_pageHeaderAndFooter($pdf, $page, $outputLangs, $socid, $sortfield, $sortorder);
@@ -597,12 +618,12 @@ class pdf_nextep
 
 		// Totals
 		$pdf->SetXY($this->posxLeft, $this->tabTop + $this->line_height + $yp + 0.5);
-		$pdf->MultiCell($this->posxDateDue - $this->posxLeft + 21, $this->line_height, $outputLangs->transnoentities("RemainderToTakeAtDateOf", dol_print_date($this->customersOwedDate, "%d/%m/%Y"), price($total_ttc - $total_amount)), 0, 'L', false, 1, '', '', true, 0, true, true, 0, 'M', false);
+		$pdf->MultiCell($this->posxDateDue - $this->posxLeft + 21, $this->line_height, $outputLangs->transnoentities("RemainderToTakeAtDateOf", dol_print_date($this->customersOwedDate, "day"), price($total_ttc - $total_amount)), 0, 'L', false, 1, '', '', true, 0, true, true, 0, 'M', false);
 
 		// 30days
 		$pdf->SetXY($this->posx30days, $this->tabTop + $this->line_height + $yp);
 		$pdf->Cell($this->totalColumnWidth, $this->line_height, price($total_ttc_30days), 0, 0, 'R', false, '', 1);
-		
+
 		// 60days
 		$pdf->SetXY($this->posx60days, $this->tabTop + $this->line_height + $yp);
 		$pdf->Cell($this->totalColumnWidth, $this->line_height, price($total_ttc_60days), 0, 0, 'R', false, '', 1);
@@ -618,15 +639,15 @@ class pdf_nextep
 		// More180days
 		$pdf->SetXY($this->posxMore180days, $this->tabTop + $this->line_height + $yp);
 		$pdf->Cell($this->totalColumnWidth, $this->line_height, price($total_ttc_More180days), 0, 0, 'R', false, '', 1);
-		
+
 		$yp = $yp + $this->line_height;
 
 		/* // WarningDelay
 		if ($numDelays > 0 && ! empty($this->warning_image_path)) {
 			$numDays = abs($conf->facture->client->warning_delay) / 60 / 60 / 24;
-			$pdf->Image($this->warning_image_path, $this->posxLeft, $this->page_hauteur - $this->marge_basse - $this->line_height + 0.4, 4, 4);
+			$pdf->Image($this->warning_image_path, $this->posxLeft, $this->page_hauteur - $this->heightforfooter - $this->line_height + 0.4, 4, 4);
 			$pdf->SetFont('', '', $defaultFontSize - 2);
-			$pdf->SetXY($this->posxLeft + 3, $this->page_hauteur - $this->marge_basse - $this->line_height);
+			$pdf->SetXY($this->posxLeft + 3, $this->page_hauteur - $this->heightforfooter - $this->line_height);
 			$pdf->Cell(80, $this->line_height, "= " . $outputLangs->transnoentities('WarningDelay', $numDays), 0, 0, 'L', 0, false, '', 0);
 		}*/
 	}
